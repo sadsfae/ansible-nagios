@@ -19,15 +19,14 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
      - Fedora 23 or higher needs to have ```yum python2 python2-dnf libselinux-python``` packages.
        * You can run this against Fedora clients prior to running Ansible ELK:
        - ```ansible fedora-client-01 -u root -m shell -i hosts -a "dnf install yum python2 libsemanage-python python2-dnf -y"```
-   - Deployment tested on Ansible 1.9.4 and 2.0.2
 
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Nagios ports default to 80/443 for HTTPD/Nagios, but these are configurable in ```install/group_vars/all.yml```
    - Implementation is very simple, with only the following server types generated right now:
-     - out-of-band management interfaces (Dell iDRAC, IPMI etc).
-     - webservers
-     - network switches
+     - out-of-band interfaces (Dell iDRAC, IPMI etc) (ping/ssh)
+     - webservers (http check)
+     - network switches (ping/ssh)
 
 **Nagios Server Instructions**
    - Clone repo and setup your hosts file
