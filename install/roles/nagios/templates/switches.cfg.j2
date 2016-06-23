@@ -1,0 +1,33 @@
+# ICMP and ssh checks of switches
+define hostgroup {
+	hostgroup_name switches 
+        alias Network Switches
+}
+
+{% for host in groups['switches'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }} 
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	hostgroups 		        switches
+}
+{% endfor %}
+
+# service checks to be applied to oob interfaces
+define service {
+	use				            local-service
+	hostgroup_name			    switches
+	service_description	        switch-ssh
+	check_command			    check_ssh
+	notifications_enabled		0
+}
+
+define service {
+	use				            local-service
+	hostgroup_name			    switches
+	service_description	        switch-ping
+	check_command			    check_icmp
+	notifications_enabled		0
+}
+

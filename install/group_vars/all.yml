@@ -1,0 +1,8 @@
+
+---
+
+### Nagios Variables ###
+nagios_username: nagiosadmin
+nagios_password: changeme
+nagios_http_port: 80
+nagios_https_port: 443

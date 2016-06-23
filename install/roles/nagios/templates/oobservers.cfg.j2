@@ -1,0 +1,24 @@
+# idrac or out-of-band interfaces
+define hostgroup {
+	hostgroup_name oobservers
+        alias OOB Interfaces
+}
+
+{% for host in groups['oobservers'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }} 
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	hostgroups 		        oobservers
+}
+{% endfor %}
+
+# service checks to be applied to oob interfaces
+define service {
+	use				            local-service
+	hostgroup_name			    oobservers 
+	service_description	        oobinterface
+	check_command			    check_http
+	notifications_enabled		0
+}
