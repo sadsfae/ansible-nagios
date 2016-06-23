@@ -34,7 +34,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
 ```
 git clone https://github.com/sadsfae/ansible-nagios
 cd ansible-elk
-sed -i 's/host-01/nagios/' hosts
+sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Run the playbook
 ```
