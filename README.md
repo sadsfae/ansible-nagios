@@ -4,7 +4,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
 
 **Ansible Bugs**
    - Currently I'm affected by these Ansible bugs which keep some of the
-     template-generated configurations from working correctly.
+     template-generated configurations from working correctly on Ansible 2.1.0.0-1 (Fedora)
      * [Ansible bug #9260](https://github.com/ansible/ansible/issues/9260)
      * [Ansible bug #15525](https://github.com/ansible/ansible/issues/15525)
 
