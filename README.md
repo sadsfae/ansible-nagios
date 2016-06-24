@@ -47,8 +47,8 @@ idrac-web01
 ```
 ansible-playbook -i hosts install/elk.yml
 ```
-   - Navigate to the server at http://yourhost
-   - Default login is ```nagiosadmin / changeme```
+   - Navigate to the server at https://yourhost/nagios
+   - Default login is ```nagiosadmin / changeme``` unless you changed it in ```install/group_vars/all.yml```
 
 **TODO**
    - Write equivalent ```nagios-client``` playbooks for NRPE
