@@ -9,7 +9,7 @@ define host {
 	use                     generic-switch
 	host_name               {{ host }}
 	alias                   {{ host }}
-	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	address                 {{ hostvars[host].ansible_host }}
 	hostgroups 		        switches
 }
 {% endfor %}
@@ -18,16 +18,7 @@ define host {
 define service {
 	use				            generic-service
 	hostgroup_name			    switches
-	service_description	        switch-ssh
+	service_description	        SSH
 	check_command			    check_ssh
 	notifications_enabled		1
 }
-
-define service {
-	use				            generic-service
-	hostgroup_name			    switches
-	service_description	        switch-ping
-	check_command			    check_ping!100.0,20%!500.0,60%
-	notifications_enabled		1
-}
-

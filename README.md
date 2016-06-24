@@ -31,16 +31,17 @@ cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Add any hosts for checks in the ```hosts``` inventory
-
+   - Note that you need to add ```ansible_host``` aliases for switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
 ```
 [webservers]
-web01
+webserver01
 
 [switches]
-switch01
+switch01 ansible_host=192.168.0.100
+switch02 ansible_host=192.168.0.102
 
 [oobservers]
-idrac-web01
+webserver01-idrac ansible_host=192.168.0.105
 
 [servers]
 server01

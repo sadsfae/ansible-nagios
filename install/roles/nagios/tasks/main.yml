@@ -28,7 +28,7 @@
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
   notify: restart httpd
 
-- name: Install nagios Packages and Common Plugins
+- name: Install nagios packages and common plugins
   yum: name={{ item }} state=present
   become: true
   with_items:

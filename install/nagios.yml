@@ -5,7 +5,10 @@
 
 # we need to collect facts from all hosts we reference
 # https://github.com/ansible/ansible/issues/9260
-- hosts: all
+# we skip switches/oobservers because they normally don't
+# have python installed.
+
+- hosts: all:!switches:!oobservers
   remote_user: root
   tasks: []
 
