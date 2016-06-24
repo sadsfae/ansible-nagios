@@ -5,9 +5,8 @@
 
 # we need to collect facts from all hosts we reference
 # https://github.com/ansible/ansible/issues/9260
-# however this fails due to:
-# https://github.com/ansible/ansible/issues/15525
 - hosts: all
+  remote_user: root
   tasks: []
 
 - hosts: nagios

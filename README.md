@@ -43,5 +43,5 @@ ansible-playbook -i hosts install/elk.yml
    - Default login is ```nagiosadmin / changeme```
 
 **TODO**
-   - Hope the Ansible bugs above get fixed
+   - Get the final config bits working
    - Write equivalent ```nagios-client``` playbooks for NRPE

@@ -28,22 +28,6 @@
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
   notify: restart httpd
 
-- name: Check nagios Users
-  stat: path=/etc/nagios/passwd
-  ignore_errors: true
-  register: nagios_user_pwfile_exists
-
-- name: Create empty password file
-  command: touch /etc/nagios/passwd
-  args:
-    creates: /etc/nagios/passwd
-  when: nagios_user_pwfile_exists != 0
-
-- name: Create nagios admin user
-  command: htpasswd -b -c /etc/nagios/passwd {{nagios_username}} {{nagios_password}}
-  #ignore_errors: true
-  when: nagios_user_pwfile_exists != 0
-
 - name: Install nagios Packages and Common Plugins
   yum: name={{ item }} state=present
   become: true
@@ -61,6 +45,21 @@
     - nagios-plugins-swap
     - nagios-plugins-ping
 
+- name: Check nagios Users
+  stat: path=/etc/nagios/passwd
+  ignore_errors: true
+  register: nagios_user_pwfile_exists
+
+- name: Create empty password file
+  command: touch /etc/nagios/passwd
+  args:
+    creates: /etc/nagios/passwd
+  when: nagios_user_pwfile_exists != 0
+
+- name: Create nagios admin user
+  command: htpasswd -b -c /etc/nagios/passwd {{nagios_username}} {{nagios_password}}
+  ignore_errors: true
+  when: nagios_user_pwfile_exists != 0
 - name: Disable EPEL Repo
   ini_file: dest=/etc/yum.repos.d/epel.repo
     section=epel
@@ -208,7 +207,7 @@
 ### end firewall settings ###
 
 - name: Start nagios service
-  command: systemctl restart nginx.service
+  command: systemctl restart nagios.service
   ignore_errors: true
   when: nagios_needs_restart != 0
 
@@ -216,10 +215,21 @@
   command: systemctl enable nagios.service
   ignore_errors: true
 
+- name: Setup HTTPD service
+  command: systemctl enable httpd.service
+  ignore_errors: true
+  when: nagios_needs_restart !=0
+
+- name: Restart HTTPD service
+  command: systemctl restart httpd.service
+  ignore_errors: true
+  when: nagios_needs_restart !=0
+
 - name: Display nagios information
   debug:
     msg="You can access nagios at https://{{ansible_host}}/nagios using {{nagios_username}} / {{nagios_password}}"
 
 - name: Display user password change information
   debug:
-    msg="Run the following to change the Nagios password:  htpasswd /etc/nagios/passwd nagiosadmin"
+    msg="Run the following to change the nagios password --> htpasswd /etc/nagios/passwd nagiosadmin"
+
