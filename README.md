@@ -8,7 +8,8 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
    - Automated deployment of Nagios on CentOS or RHEL
      * Generates service checks, and monitored hosts from Ansible inventory
      * Wraps Nagios in SSL via Apache
-     * Templating inspired from the official [ansible examples](https://github.com/ansible/ansible-examples)
+     * Sets up proper firewall rules (firewalld or iptables-services)
+     * Templating inspired from [ansible examples](https://github.com/ansible/ansible-examples)
 
 **Requirements**
    - RHEL7 or CentOS7+ for Nagios server.
@@ -16,21 +17,21 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Implementation is very simple, with only the following server types generated right now:
-     - out-of-band interfaces (Dell iDRAC, IPMI etc) (ping/ssh)
-     - generic servers (ping, ssh, users, load, swap)
-     - webservers (http check, ping, ssh, users, load, swap)
-     - network switches (ping/ssh)
-   - I do not setup the ```contacts.cfg``` file for notifications
+     - out-of-band interfaces *(ping/ssh)*
+     - generic servers *(ping, ssh, users, load, swap)*
+     - webservers *(http, ping, ssh, users, load, swap)*
+     - network switches *(ping/ssh)*
+   - I do not setup the ```contacts.cfg``` file for alerts/notifications.
 
 **Nagios Server Instructions**
-   - Clone repo and setup your hosts file
+   - Clone repo and setup your Ansible inventory (hosts) file
 ```
 git clone https://github.com/sadsfae/ansible-nagios
 cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Add any hosts for checks in the ```hosts``` inventory
-   - Note that you need to add ```ansible_host``` aliases for switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
+   - Note that you need to add ```ansible_host``` entries for IP addresses for switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
 ```
 [webservers]
 webserver01
