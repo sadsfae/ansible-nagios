@@ -16,7 +16,6 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
 
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
-   - Nagios ports default to 80/443 for HTTPD/Nagios, but these are configurable in ```install/group_vars/all.yml```
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces (Dell iDRAC, IPMI etc) (ping/ssh)
      - webservers (http check)
@@ -54,3 +53,4 @@ ansible-playbook -i hosts install/elk.yml
    - Write equivalent ```nagios-client``` playbooks for NRPE
    - Expand checks
    - Add support for new server types
+   - Allow for Nagios/HTTP ports to be configurable
