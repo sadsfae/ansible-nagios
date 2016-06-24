@@ -1,6 +1,8 @@
 ansible-nagios
 ==============
-Ansible Playbook for setting up the Nagios monitoring system and clients
+Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
+
+![Nagios](/image/ansible-nagios.png?raw=true)
 
 **What does it do?**
    - Automated deployment of Nagios on CentOS or RHEL
@@ -55,3 +57,30 @@ ansible-playbook -i hosts install/elk.yml
    - Expand checks
    - Add support for new server types
    - Allow for Nagios/HTTP ports to be configurable
+
+**Files**
+
+```
+├── hosts
+└── install
+    ├── group_vars
+    │   └── all.yml
+    ├── nagios.yml
+    └── roles
+        ├── nagios
+        │   ├── files
+        │   │   ├── localhost.cfg
+        │   │   ├── nagios.cfg
+        │   │   ├── nagios.conf
+        │   │   └── services.cfg
+        │   ├── tasks
+        │   │   └── main.yml
+        │   └── templates
+        │       ├── oobservers.cfg.j2
+        │       ├── servers.cfg.j2
+        │       ├── switches.cfg.j2
+        │       └── webservers.cfg.j2
+        └── nagios-client
+
+8 directories, 12 files
+```
