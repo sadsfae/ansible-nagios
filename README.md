@@ -9,10 +9,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
      * Templating inspired from the official [ansible examples](https://github.com/ansible/ansible-examples)
 
 **Requirements**
-   - RHEL7 or CentOS7+ server/client with no modifications
-     - Fedora 23 or higher needs to have ```yum python2 python2-dnf libselinux-python``` packages.
-       * You can run this against Fedora clients prior to running Ansible ELK:
-       - ```ansible fedora-client-01 -u root -m shell -i hosts -a "dnf install yum python2 libsemanage-python python2-dnf -y"```
+   - RHEL7 or CentOS7+ for Nagios server.
 
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
