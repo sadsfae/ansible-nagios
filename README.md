@@ -18,7 +18,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces (Dell iDRAC, IPMI etc) (ping/ssh)
-     - webservers (http check)
+     - generic servers (ping, ssh, users, load, swap)
+     - webservers (http check, ping, ssh, users, load, swap)
      - network switches (ping/ssh)
    - I do not setup the ```contacts.cfg``` file for notifications
 
@@ -41,6 +42,8 @@ switch01
 [oobservers]
 idrac-web01
 
+[servers]
+server01
 ```
    - Run the playbook
 ```

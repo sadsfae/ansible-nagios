@@ -1,10 +1,10 @@
-# generic web services
+# generic Linux servers
 define hostgroup {
-	hostgroup_name webservers
-        alias Web Servers
+	hostgroup_name servers
+        alias Linux Servers
 }
 
-{% for host in groups['webservers'] %}
+{% for host in groups['servers'] %}
 define host {
 	use                     linux-server
 	host_name               {{ host }} 
@@ -17,14 +17,7 @@ define host {
 # service checks to be applied to the web server
 define service {
 	use				            local-service
-	hostgroup_name			    webservers
-	service_description	        check-web
-	check_command			    check_http
-	notifications_enabled		1
-}
-define service {
-	use				            local-service
-	hostgroup_name			    webservers
+	hostgroup_name			    servers
 	service_description	        SSH
 	check_command			    check_ssh
 	notifications_enabled		1

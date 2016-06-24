@@ -85,6 +85,7 @@
     - oobservers.cfg
     - switches.cfg
     - webservers.cfg
+    - servers.cfg
   register: nagios_needs_restart
 
 # SELinux boolean for nagios
