@@ -30,9 +30,7 @@ git clone https://github.com/sadsfae/ansible-nagios
 cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
-   - Add any hosts for checks
-Take a look at ```hosts``` again, adding in any other hosts you want to generate
-checks for like the below example:
+   - Add any hosts for checks in the ```hosts``` inventory
 
 ```
 [webservers]
