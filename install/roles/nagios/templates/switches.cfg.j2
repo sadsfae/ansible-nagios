@@ -16,7 +16,7 @@ define host {
 
 # service checks to be applied to oob interfaces
 define service {
-	use				            local-service
+	use				            generic-service
 	hostgroup_name			    switches
 	service_description	        switch-ssh
 	check_command			    check_ssh
@@ -24,10 +24,10 @@ define service {
 }
 
 define service {
-	use				            local-service
+	use				            generic-service
 	hostgroup_name			    switches
 	service_description	        switch-ping
-	check_command			    check_ping
+	check_command			    check_ping!100.0,20%!500.0,60%
 	notifications_enabled		1
 }
 
