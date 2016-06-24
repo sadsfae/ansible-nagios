@@ -10,7 +10,7 @@ define host {
 	host_name               {{ host }} 
 	alias                   {{ host }}
 	address                 {{ hostvars[host].ansible_default_ipv4.address }}
-	hostgroups 		        webservers
+	hostgroups 		        servers
 }
 {% endfor %}
 
