@@ -4,9 +4,9 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
 
 **What does it do?**
    - Automated deployment of Nagios on CentOS or RHEL
-     * Generates service checks, and hosts from Ansible inventory
+     * Generates service checks, and monitored hosts from Ansible inventory
      * Wraps Nagios in SSL via Apache
-     * Approach was inspired from the official [ansible examples](https://github.com/ansible/ansible-examples)
+     * Templating inspired from the official [ansible examples](https://github.com/ansible/ansible-examples)
 
 **Requirements**
    - RHEL7 or CentOS7+ server/client with no modifications
@@ -27,7 +27,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
    - Clone repo and setup your hosts file
 ```
 git clone https://github.com/sadsfae/ansible-nagios
-cd ansible-elk
+cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Add any hosts for checks
@@ -54,3 +54,5 @@ ansible-playbook -i hosts install/elk.yml
 
 **TODO**
    - Write equivalent ```nagios-client``` playbooks for NRPE
+   - Expand checks
+   - Add support for new server types
