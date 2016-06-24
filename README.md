@@ -2,12 +2,6 @@ ansible-nagios
 ==============
 Ansible Playbook for setting up the Nagios monitoring system and clients
 
-**Ansible Bugs**
-   - Currently I'm affected by these Ansible bugs which keep some of the
-     template-generated configurations from working correctly on Ansible 2.1.0.0-1 (Fedora)
-     * [Ansible bug #9260](https://github.com/ansible/ansible/issues/9260)
-     * [Ansible bug #15525](https://github.com/ansible/ansible/issues/15525)
-
 **What does it do?**
    - Automated deployment of Nagios on CentOS or RHEL
      * Generates service checks, and hosts from Ansible inventory
@@ -27,6 +21,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
      - out-of-band interfaces (Dell iDRAC, IPMI etc) (ping/ssh)
      - webservers (http check)
      - network switches (ping/ssh)
+   - I do not setup the ```contacts.cfg``` file for notifications
 
 **Nagios Server Instructions**
    - Clone repo and setup your hosts file
@@ -34,6 +29,21 @@ Ansible Playbook for setting up the Nagios monitoring system and clients
 git clone https://github.com/sadsfae/ansible-nagios
 cd ansible-elk
 sed -i 's/host-01/yournagioshost/' hosts
+```
+   - Add any hosts for checks
+Take a look at ```hosts``` again, adding in any other hosts you want to generate
+checks for like the below example:
+
+```
+[webservers]
+web01
+
+[switches]
+switch01
+
+[oobservers]
+idrac-web01
+
 ```
    - Run the playbook
 ```
@@ -43,5 +53,4 @@ ansible-playbook -i hosts install/elk.yml
    - Default login is ```nagiosadmin / changeme```
 
 **TODO**
-   - Get the final config bits working
    - Write equivalent ```nagios-client``` playbooks for NRPE

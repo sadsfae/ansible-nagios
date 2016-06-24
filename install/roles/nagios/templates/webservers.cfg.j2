@@ -18,7 +18,7 @@ define host {
 define service {
 	use				            local-service
 	hostgroup_name			    webservers
-	service_description	        check-web-interface
+	service_description	        check-web
 	check_command			    check_http
-	notifications_enabled		0
+	notifications_enabled		1
 }

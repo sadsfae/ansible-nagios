@@ -2,10 +2,7 @@
 host-01
 
 [webservers]
-host-02
 
 [switches]
-host-02
 
 [oobservers]
-host-02

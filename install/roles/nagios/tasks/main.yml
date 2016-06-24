@@ -44,6 +44,9 @@
     - nagios-plugins-uptime
     - nagios-plugins-swap
     - nagios-plugins-ping
+    - nagios-plugins-procs
+    - nagios-plugins-users
+    - nagios-plugins-disk
 
 - name: Check nagios Users
   stat: path=/etc/nagios/passwd
@@ -93,6 +96,13 @@
 - name: Apply SELinux boolean logging_syslogd_run_nagios_plugins
   seboolean: name=logging_syslogd_run_nagios_plugins state=yes persistent=yes
   ignore_errors: true
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1291718
+- name: Create nagios socket tmp files
+  file:
+    path=/var/log/nagios/rw
+    state=directory
+    mode=0777
 
 ### begin firewall ###
 # we need TCP/80 and TCP/443 open
