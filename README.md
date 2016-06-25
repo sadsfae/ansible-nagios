@@ -9,7 +9,6 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
      * Generates service checks, and monitored hosts from Ansible inventory
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
-     * Templating inspired from [ansible examples](https://github.com/ansible/ansible-examples)
 
 **Requirements**
    - RHEL7 or CentOS7+ for Nagios server.
@@ -21,7 +20,7 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
      - generic servers *(ping, ssh, users, load, swap)*
      - webservers *(http, ping, ssh, users, load, swap)*
      - network switches *(ping, ssh)*
-   - I do not setup the ```contacts.cfg``` file for alerts/notifications.
+   - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
 
 **Nagios Server Instructions**
    - Clone repo and setup your Ansible inventory (hosts) file

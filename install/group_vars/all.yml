@@ -6,3 +6,5 @@ nagios_username: nagiosadmin
 nagios_password: changeme
 nagios_http_port: 80
 nagios_https_port: 443
+admin_name_01: nagiosadmin
+admin_email_01: nagios@localhost

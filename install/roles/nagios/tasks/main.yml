@@ -78,7 +78,7 @@
 - name: Create generic nagios services config
   copy: src=services.cfg dest=/etc/nagios/
 
-- name: Create the nagios object files
+- name: Generate the nagios monitoring templates
   template: src={{ item + ".j2" }}
             dest=/etc/nagios/conf.d/{{ item }}
   with_items:
@@ -87,6 +87,12 @@
     - webservers.cfg
     - servers.cfg
   register: nagios_needs_restart
+
+- name: Generate the nagios contact template
+  template: src={{ item + ".j2" }}
+            dest=/etc/nagios/objects/{{ item }}
+  with_items:
+    - contacts.cfg
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
