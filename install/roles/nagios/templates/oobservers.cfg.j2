@@ -29,3 +29,10 @@ define service {
 	check_command			    check_ssh
 	notifications_enabled		1
 }
+define service {
+	use				            generic-service
+	hostgroup_name			    oobservers
+	service_description	        PING
+	check_command			    check_ping!200.0,20%!600.0,60%
+	notifications_enabled		1
+}

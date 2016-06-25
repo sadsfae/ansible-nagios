@@ -17,10 +17,10 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Implementation is very simple, with only the following server types generated right now:
-     - out-of-band interfaces *(ping/ssh)*
+     - out-of-band interfaces *(ping, ssh, http)*
      - generic servers *(ping, ssh, users, load, swap)*
      - webservers *(http, ping, ssh, users, load, swap)*
-     - network switches *(ping/ssh)*
+     - network switches *(ping, ssh)*
    - I do not setup the ```contacts.cfg``` file for alerts/notifications.
 
 **Nagios Server Instructions**
