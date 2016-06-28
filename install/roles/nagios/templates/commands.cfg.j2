@@ -19,6 +19,13 @@ define command {
 	command_name                   check_nrpe
 	command_line                   /usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
 }
+
+# check_uptime command definition
+define command{
+        command_name    check_uptime
+        command_line    /usr/lib64/nagios/plugins/check_uptime
+        }
+
 ### You can define more custom commands below for NRPE ###
 #
 #define command {
