@@ -7,6 +7,7 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
 **What does it do?**
    - Automated deployment of Nagios on CentOS or RHEL
      * Generates service checks, and monitored hosts from Ansible inventory
+     * Generates comprehensive checks for the Nagios server
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
 
@@ -17,8 +18,8 @@ Ansible Playbook for setting up the Nagios monitoring system on CentOS/RHEL.
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces *(ping, ssh, http)*
-     - generic servers *(ping, ssh, users, load, swap)*
-     - webservers *(http, ping, ssh, users, load, swap)*
+     - generic servers *(ping, ssh)*
+     - webservers *(http, ping, ssh)*
      - network switches *(ping, ssh)*
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
 
@@ -67,20 +68,20 @@ ansible-playbook -i hosts install/elk.yml
     │   └── all.yml
     ├── nagios.yml
     └── roles
-        ├── nagios
-        │   ├── files
-        │   │   ├── localhost.cfg
-        │   │   ├── nagios.cfg
-        │   │   ├── nagios.conf
-        │   │   └── services.cfg
-        │   ├── tasks
-        │   │   └── main.yml
-        │   └── templates
-        │       ├── oobservers.cfg.j2
-        │       ├── servers.cfg.j2
-        │       ├── switches.cfg.j2
-        │       └── webservers.cfg.j2
-        └── nagios-client
+        └── nagios
+            ├── files
+            │   ├── localhost.cfg
+            │   ├── nagios.cfg
+            │   ├── nagios.conf
+            │   └── services.cfg
+            ├── tasks
+            │   └── main.yml
+            └── templates
+                ├── contacts.cfg.j2
+                ├── oobservers.cfg.j2
+                ├── servers.cfg.j2
+                ├── switches.cfg.j2
+                └── webservers.cfg.j2
 
-8 directories, 12 files
+7 directories, 13 files
 ```
