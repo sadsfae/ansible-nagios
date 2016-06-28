@@ -8,3 +8,5 @@ nagios_http_port: 80
 nagios_https_port: 443
 admin_name_01: nagiosadmin
 admin_email_01: nagios@localhost
+### NRPE variables ###
+nrpe_tcp_port: 5666

@@ -18,7 +18,7 @@ define host {
 define service {
 	use				            local-service
 	hostgroup_name			    webservers
-	service_description	        check-web
+	service_description	        HTTP
 	check_command			    check_http
 	notifications_enabled		1
 }
@@ -35,4 +35,51 @@ define service {
     service_description         PING
     check_command               check_ping!200.0,20%!600.0,60%
     notifications_enabled       1
+}
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     CPU Load
+    check_command           check_nrpe!check_load
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     Total Processes
+    check_command           check_nrpe!check_total_procs
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     Zombie Processes
+    check_command           check_nrpe!check_zombie_procs
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     Current Users
+    check_command           check_nrpe!check_users
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     Disk Check
+    check_command           check_nrpe!check_root
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          webservers
+    service_description     Uptime
+    check_command           check_nrpe!check_uptime
+    notifications_enabled   1
 }

@@ -36,9 +36,7 @@
     - nagios-common
     - nagios-plugins-ssh
     - nagios-plugins-tcp
-    - nagios-plugins-fping
     - nagios-plugins-http
-    - nagios-plugins-icmp
     - nagios-plugins-load
     - nagios-plugins-nrpe
     - nagios-plugins-uptime
@@ -47,6 +45,7 @@
     - nagios-plugins-procs
     - nagios-plugins-users
     - nagios-plugins-disk
+    - libsemanage-python
 
 - name: Check nagios Users
   stat: path=/etc/nagios/passwd
@@ -63,11 +62,6 @@
   command: htpasswd -b -c /etc/nagios/passwd {{nagios_username}} {{nagios_password}}
   ignore_errors: true
   when: nagios_user_pwfile_exists != 0
-- name: Disable EPEL Repo
-  ini_file: dest=/etc/yum.repos.d/epel.repo
-    section=epel
-    option=enabled
-    value=0
 
 - name: Configure nagios main configuration
   copy: src=nagios.cfg dest=/etc/nagios/nagios.cfg
@@ -86,6 +80,7 @@
     - switches.cfg
     - webservers.cfg
     - servers.cfg
+    - commands.cfg
   register: nagios_needs_restart
 
 - name: Generate the nagios contact template

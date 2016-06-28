@@ -1,6 +1,7 @@
 ---
 #
-# Playbook to install nagios
+# Playbook to install nagios server, clients and
+# generate service checks based on Ansible inventory
 #
 
 # we need to collect facts from all hosts we reference
@@ -12,6 +13,13 @@
   remote_user: root
   tasks: []
 
+# role for nagios clients via NRPE
+- hosts: all:!switches:!oobservers:!nagios
+  remote_user: root
+  roles:
+    - { role: nagios-client }
+
+# role for nagios server
 - hosts: nagios
   remote_user: root
   roles:
