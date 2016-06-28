@@ -55,6 +55,10 @@ ansible-playbook -i hosts install/elk.yml
    - Navigate to the server at https://yourhost/nagios
    - Default login is ```nagiosadmin / changeme``` unless you changed it in ```install/group_vars/all.yml```
 
+**Demonstration**
+   - You can view a video of the Ansible deployment here:
+[![Ansible Nagios](http://img.youtube.com/vi/6vfhflwC_Wg/0.jpg)](http://www.youtube.com/watch?v=6vfhflwC_Wg "Deploying Nagios with Ansible")
+
 **Files**
 
 ```
