@@ -57,7 +57,9 @@ ansible-playbook -i hosts install/elk.yml
 
 **Demonstration**
    - You can view a video of the Ansible deployment here:
+
 [![Ansible Nagios](http://img.youtube.com/vi/6vfhflwC_Wg/0.jpg)](http://www.youtube.com/watch?v=6vfhflwC_Wg "Deploying Nagios with Ansible")
+
 
 **Files**
 
