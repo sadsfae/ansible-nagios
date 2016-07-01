@@ -104,7 +104,10 @@
   file:
     path=/var/log/nagios/rw
     state=directory
+    owner=nagios
+    group=nagios
     mode=0777
+    seuser=system_u
 
 ### begin firewall ###
 # we need TCP/80 and TCP/443 open
