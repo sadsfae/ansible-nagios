@@ -109,6 +109,17 @@
     mode=0777
     seuser=system_u
 
+# employ lineinfile fix for faulty, shipped nagios systemd service
+- name: Check/fix systemd service file
+  lineinfile: dest=/usr/lib/systemd/system/nagios.service \
+          regexp="^ExecStopPost=" \
+          line="ExecStopPost=/usr/bin/rm -f /var/spool/nagios/cmd/nagios.cmd /var/log/nagios/rw/nagios.qh"
+  register: systemd_nagios_changed
+
+- name: Reload Systemd if needed
+  command: systemctl daemon-reload
+  when: systemd_nagios_changed !=0
+
 ### begin firewall ###
 # we need TCP/80 and TCP/443 open
 # determine firewall status and take action
@@ -223,7 +234,6 @@
 
 - name: Start nagios service
   command: systemctl restart nagios.service
-  ignore_errors: true
   when: nagios_needs_restart != 0
 
 - name: Set nagios to start on boot
