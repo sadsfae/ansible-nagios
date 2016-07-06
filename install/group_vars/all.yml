@@ -4,6 +4,9 @@
 ### Nagios Variables ###
 nagios_username: nagiosadmin
 nagios_password: changeme
+nagios_create_guest_user: true
+nagios_ro_username: guest
+nagios_ro_password: guest
 nagios_http_port: 80
 nagios_https_port: 443
 admin_name_01: nagiosadmin

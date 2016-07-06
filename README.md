@@ -9,6 +9,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      * Generates service checks, and monitored hosts from Ansible inventory
      * Generates comprehensive checks for the Nagios server
      * Generates comprehensive checks for all hosts/services via NRPE
+     * Generates most of the other configs based on jinja2 templates
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
 
@@ -17,6 +18,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 
 **Notes**
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
+   - Creates a read-only user, set ```nagios_create_guest_user: false``` to disable this in ```install/group_vars/all.yml``` 
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces *(ping, ssh, http)*
      - generic servers *(ping, ssh, load, users, procs, uptime, disk space)*
@@ -50,7 +52,7 @@ server01
 ```
    - Run the playbook
 ```
-ansible-playbook -i hosts install/elk.yml
+ansible-playbook -i hosts install/nagios.yml
 ```
    - Navigate to the server at https://yourhost/nagios
    - Default login is ```nagiosadmin / changeme``` unless you changed it in ```install/group_vars/all.yml```
@@ -68,6 +70,7 @@ ansible-playbook -i hosts install/elk.yml
 └── install
     ├── group_vars
     │   └── all.yml
+    ├── nagios.retry
     ├── nagios.yml
     └── roles
         ├── nagios
@@ -79,6 +82,7 @@ ansible-playbook -i hosts install/elk.yml
         │   ├── tasks
         │   │   └── main.yml
         │   └── templates
+        │       ├── cgi.cfg.j2
         │       ├── commands.cfg.j2
         │       ├── contacts.cfg.j2
         │       ├── oobservers.cfg.j2
@@ -91,5 +95,5 @@ ansible-playbook -i hosts install/elk.yml
             └── templates
                 └── nrpe.cfg.j2
 
-10 directories, 16 files
+10 directories, 18 files
 ```

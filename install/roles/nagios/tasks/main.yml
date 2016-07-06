@@ -1,5 +1,10 @@
 ---
-#
+# Playbook to install nagios server and generate hosts/checks
+# This also installs NRPE on clients for more in-depth checks based on
+# Ansible inventory
+# author: Will Foster (@sadsfae)
+# https://github.com/sadsfae/ansible-nagios
+# https://hobo.house/2016/06/24/automate-nagios-deployment-with-ansible/
 
 - name: Check Operating System
   fail:
@@ -63,6 +68,10 @@
   ignore_errors: true
   when: nagios_user_pwfile_exists != 0
 
+- name: Create nagios guest user
+  command: htpasswd -b /etc/nagios/passwd {{nagios_ro_username}} {{nagios_ro_password}}
+  when: nagios_create_guest_user
+
 - name: Configure nagios main configuration
   copy: src=nagios.cfg dest=/etc/nagios/nagios.cfg
 
@@ -88,6 +97,12 @@
             dest=/etc/nagios/objects/{{ item }}
   with_items:
     - contacts.cfg
+
+- name: Generate the nagios user CGI template
+  template: src={{ item + ".j2" }}
+            dest=/etc/nagios/{{ item }}
+  with_items:
+    - cgi.cfg
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
@@ -253,6 +268,10 @@
 - name: Display nagios information
   debug:
     msg="You can access nagios at https://{{ansible_host}}/nagios using {{nagios_username}} / {{nagios_password}}"
+
+- name: Display nagios guest information
+  debug:
+    msg="Guest read only users at https://{{ansible_host}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
 
 - name: Display user password change information
   debug:
