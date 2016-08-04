@@ -267,11 +267,11 @@
 
 - name: Display nagios information
   debug:
-    msg="You can access nagios at https://{{ansible_host}}/nagios using {{nagios_username}} / {{nagios_password}}"
+    msg="You can access nagios at https://{{ansible_fqdn}}/nagios using {{nagios_username}} / {{nagios_password}}"
 
 - name: Display nagios guest information
   debug:
-    msg="Guest read only users at https://{{ansible_host}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
+    msg="Guest read only users at https://{{ansible_fqdn}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
 
 - name: Display user password change information
   debug:
