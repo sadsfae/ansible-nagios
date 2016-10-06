@@ -1,0 +1,85 @@
+# ELK stack servers
+define hostgroup {
+	hostgroup_name elkservers
+        alias ELK Servers
+}
+
+{% for host in groups['elkservers'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	hostgroups 		        elkservers
+}
+{% endfor %}
+
+# service checks to be applied to the elk server
+define service {
+	use				            local-service
+	hostgroup_name			    elkservers
+	service_description	        SSH
+	check_command			    check_ssh
+	notifications_enabled		1
+}
+define service {
+    use                         generic-service
+    hostgroup_name              elkservers
+    service_description         PING
+    check_command               check_ping!200.0,20%!600.0,60%
+    notifications_enabled       1
+}
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     CPU Load
+    check_command           check_nrpe!check_load
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Total Processes
+    check_command           check_nrpe!check_total_procs
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Zombie Processes
+    check_command           check_nrpe!check_zombie_procs
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Current Users
+    check_command           check_nrpe!check_users
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Disk Check
+    check_command           check_nrpe!check_root
+    notifications_enabled   1
+}
+
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Uptime
+    check_command           check_nrpe!check_uptime
+    notifications_enabled   1
+}
+define service{
+    use                     generic-service
+    hostgroup_name          elkservers
+    service_description     Elasticsearch
+    check_command           check_nrpe!check_tcp_es
+    notifications_enabled   1
+}

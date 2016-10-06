@@ -3,8 +3,11 @@ host-01
 
 [webservers]
 
+[elkservers]
+
 [switches]
 
 [oobservers]
 
 [servers]
+host-02

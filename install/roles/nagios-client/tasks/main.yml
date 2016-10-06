@@ -26,6 +26,7 @@
     - nagios-plugins-procs
     - nagios-plugins-users
     - nagios-plugins-disk
+    - nagios-plugins-tcp
     - libsemanage-python
 
 - name: Setup NRPE client configuration

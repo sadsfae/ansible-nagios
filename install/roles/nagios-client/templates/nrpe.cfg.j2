@@ -206,6 +206,7 @@ command[check_root]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -p {{ ans
 command[check_zombie_procs]=/usr/lib64/nagios/plugins/check_procs -w 5 -c 10 -s Z
 command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
 command[check_uptime]=/usr/lib64/nagios/plugins/check_uptime
+command[check_tcp_es]=/usr/lib64/nagios/plugins/check_tcp -H localhost -p 9200
 
 # The following examples allow user-supplied arguments and can
 # only be used if the NRPE daemon was compiled with support for
