@@ -31,8 +31,6 @@
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
-  notify: 
-    - restart httpd
 
 - name: Install nagios packages and common plugins
   yum: name={{ item }} state=present
@@ -133,6 +131,12 @@
           regexp="^ExecStopPost=" \
           line="ExecStopPost=/usr/bin/rm -f /var/spool/nagios/cmd/nagios.cmd /var/log/nagios/rw/nagios.qh"
   register: systemd_nagios_changed
+
+# change listening port for http to match group_vars/all.yml
+- name: Set HTTP Listen Port
+  lineinfile: dest=/etc/httpd/conf/httpd.conf \
+          regexp="^Listen" \
+          line="Listen {{nagios_http_port}}"
 
 - name: Reload Systemd if needed
   command: systemctl daemon-reload
