@@ -7,12 +7,18 @@ nagios_password: changeme
 nagios_create_guest_user: true
 nagios_ro_username: guest
 nagios_ro_password: guest
-nagios_http_port: 80
+nagios_http_port: 8888
 nagios_https_port: 443
 admin_name_01: nagiosadmin
+# change this to your email address if you want notifications
 admin_email_01: nagios@localhost
 ### NRPE variables ###
 nrpe_tcp_port: 5666
 # threshold for # of processes
 warning_proc: 900
 critical_proc: 1000
+### ELK options ###
+# if you use my ELK playbook you'll need this for HTTP checks
+# https://github.com/sadsfae/ansible-elk
+kibana_user: admin
+kibana_password: admin

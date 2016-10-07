@@ -5,6 +5,8 @@ host-01
 
 [elkservers]
 
+[elasticsearch]
+
 [switches]
 
 [oobservers]

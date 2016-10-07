@@ -26,6 +26,12 @@ define command{
         command_line    /usr/lib64/nagios/plugins/check_uptime
         }
 
+# 'check_http' command definition for elk kibana
+define command{
+        command_name    check_elk_http
+        command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
+        }
+        
 ### You can define more custom commands below for NRPE ###
 #
 #define command {

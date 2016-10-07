@@ -22,7 +22,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces *(ping, ssh, http)*
      - generic servers *(ping, ssh, load, users, procs, uptime, disk space)*
-     - ELK servers *(same as servers plus TCP/9200 for elasticsearch)*
+     - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers plus elasticsearch and Kibana)*
+     - elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
      - webservers *(http, ping, ssh, load, users, procs, uptime, disk space)*
      - network switches *(ping, ssh)*
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
