@@ -200,7 +200,7 @@ connection_timeout=300
 
 # The following examples use hardcoded command arguments...
 
-command[check_users]=/usr/lib64/nagios/plugins/check_users -w 5 -c 10
+command[check_users]=/usr/lib64/nagios/plugins/check_users -w {{ warning_users }} -c {{ critical_users }}
 command[check_load]=/usr/lib64/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
 command[check_root]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -p {{ ansible_mounts[0]['device'] }}
 command[check_zombie_procs]=/usr/lib64/nagios/plugins/check_procs -w 5 -c 10 -s Z

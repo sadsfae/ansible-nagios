@@ -17,6 +17,9 @@ nrpe_tcp_port: 5666
 # threshold for # of processes
 warning_proc: 900
 critical_proc: 1000
+# threshold for # of logged in users
+warning_users: 15
+critical_users: 30
 ### ELK options ###
 # if you use my ELK playbook you'll need this for HTTP checks
 # https://github.com/sadsfae/ansible-elk
