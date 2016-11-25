@@ -62,6 +62,23 @@ ansible-playbook -i hosts install/nagios.yml
    - Navigate to the server at https://yourhost/nagios
    - Default login is ```nagiosadmin / changeme``` unless you changed it in ```install/group_vars/all.yml```
 
+**Known Issues**
+
+SELinux doesn't always play well with Nagios, or the policies may be out of date as shipped with CentOS/RHEL.
+```
+avc:  denied  { create } for  pid=8800 comm="nagios" name="nagios.qh
+```
+   - If you see this (or nagios doesn't start) you'll need to create an SELinux policy module.
+```
+# cat /var/log/audit/audit.log | audit2allow -M mynagios
+# semodule -i mynagios.pp
+```
+Now restart Nagios and Apache and you should be good to go.
+```
+systemctl restart nagios
+systemctl restart httpd
+```
+
 **Demonstration**
    - You can view a video of the Ansible deployment here:
 
