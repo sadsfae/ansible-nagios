@@ -37,7 +37,10 @@ cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Add any hosts for checks in the ```hosts``` inventory
-   - Note that you need to add ```ansible_host``` entries for IP addresses for switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
+   - Note that you need to add ```ansible_host``` entries __only__ for IP addresses for switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
+   - Anything not a switch or oobserver should use the FQDN (or an /etc/hosts entry) for the inventory hostname or you may see this error:
+     - ```AnsibleUndefinedVariable: 'dict object' has no attribute 'ansible_default_ipv4'}```
+
 ```
 [webservers]
 webserver01
