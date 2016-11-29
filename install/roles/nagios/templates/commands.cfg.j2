@@ -31,7 +31,12 @@ define command{
         command_name    check_elk_http
         command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
         }
-        
+
+# 'check_idrac_all' command definition for idracs
+define command{
+        command_name    check_idrac_all
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} 
+}
 ### You can define more custom commands below for NRPE ###
 #
 #define command {

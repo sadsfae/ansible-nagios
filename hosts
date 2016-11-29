@@ -13,3 +13,5 @@ host-01
 
 [servers]
 host-02
+
+[idrac]

@@ -25,3 +25,8 @@ critical_users: 30
 # https://github.com/sadsfae/ansible-elk
 kibana_user: admin
 kibana_password: admin
+### snmp options ###
+# these are for dell idrac only
+snmp_mib_path: /usr/share/snmp/mibs
+snmp_opts: -v2c -c public
+snmp_check_thresholds: --warn '$ALL$' --crit 'critical|nonRecoverable|fail' --ok 'ok|online|on|spunup|full|ready|enabled|presence'

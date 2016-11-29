@@ -28,6 +28,7 @@
     - mod_ssl
     - openssl
     - openssl-libs
+    - net-snmp-utils
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
@@ -74,6 +75,12 @@
 - name: Configure nagios main configuration
   copy: src=nagios.cfg dest=/etc/nagios/nagios.cfg
 
+- name: Copy idrac check plugin
+  copy: src=idrac_2.2rc4 dest=/usr/lib64/nagios/plugins/idrac_2.2rc4
+
+- name: Configure Dell idrac snmp mib file
+  copy: src=idrac-smiv2.mib  dest={{snmp_mib_path}}/
+
 - name: Configure nagios localhost monitoring
   copy: src=localhost.cfg dest=/etc/nagios/objects/localhost.cfg
 
@@ -91,6 +98,7 @@
     - commands.cfg
     - elkservers.cfg
     - elasticsearch.cfg
+    - idrac.cfg
   register: nagios_needs_restart
 
 - name: Generate the nagios contact template

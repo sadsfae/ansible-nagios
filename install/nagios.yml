@@ -9,12 +9,12 @@
 # we skip switches/oobservers because they normally don't
 # have python installed.
 
-- hosts: all:!switches:!oobservers
+- hosts: all:!switches:!oobservers:!idrac
   remote_user: root
   tasks: []
 
 # role for nagios clients via NRPE
-- hosts: all:!switches:!oobservers:!nagios
+- hosts: all:!switches:!oobservers:!nagios:!idrac
   remote_user: root
   roles:
     - { role: nagios-client }
