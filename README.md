@@ -94,7 +94,7 @@ systemctl restart httpd
 ## iDRAC Server Health Details
    - The iDRAC health checks are all optional, you can pick which ones you want to monitor.
 
-![iDRAC](/image/idrac-check.png?raw=true)
+![CHECK](/image/idrac-check.jpg?raw=true)
 
    - The iDRAC health check will provide exhaustive health information and alert upon it.
 
