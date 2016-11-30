@@ -29,4 +29,24 @@ kibana_password: admin
 # these are for dell idrac only
 snmp_mib_path: /usr/share/snmp/mibs
 snmp_opts: -v2c -c public
+# these flag for strings to match failure, warn or ok
 snmp_check_thresholds: --warn '$ALL$' --crit 'critical|nonRecoverable|fail' --ok 'ok|online|on|spunup|full|ready|enabled|presence'
+# settings to check for idrac
+# power supply
+idrac_ps: true
+# system fans and speed
+idrac_fan: true
+# CMOS battery
+idrac_battery: true
+# power redundancy
+idrac_pu: true
+# system memory
+idrac_mem: true
+# physical disk/RAID
+idrac_disk: true
+# RAID vdisk or JBOD
+idrac_vdisk: true
+# temperature
+idrac_sensor: true
+# system cpu
+idrac_cpu: true

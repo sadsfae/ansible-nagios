@@ -1,6 +1,8 @@
 [nagios]
 host-01
 
+[servers]
+
 [webservers]
 
 [elkservers]
@@ -10,8 +12,5 @@ host-01
 [switches]
 
 [oobservers]
-
-[servers]
-host-02
 
 [idrac]

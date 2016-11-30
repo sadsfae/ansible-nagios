@@ -18,7 +18,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 
 ## Notes
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
-   - Creates a read-only user, set ```nagios_create_guest_user: false``` to disable this in ```install/group_vars/all.yml``` 
+   - Creates a read-only user, set ```nagios_create_guest_user: false``` to disable this in ```install/group_vars/all.yml```
    - Implementation is very simple, with only the following server types generated right now:
      - out-of-band interfaces *(ping, ssh, http)*
      - generic servers *(ping, ssh, load, users, procs, uptime, disk space)*
@@ -27,7 +27,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      - webservers *(http, ping, ssh, load, users, procs, uptime, disk space)*
      - network switches *(ping, ssh)*
      - Dell iDRAC checks courtesy of @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
-       - By default we will check all server health values from iDRAC 7/8 via snmp
+       - You can select which checks you want in ```install/group_vars/all.yml```
+         - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
    - Adding new hosts to inventory file will just regenerate the Nagios configs
 
@@ -91,6 +92,9 @@ systemctl restart httpd
 [![Ansible Nagios](http://img.youtube.com/vi/6vfhflwC_Wg/0.jpg)](http://www.youtube.com/watch?v=6vfhflwC_Wg "Deploying Nagios with Ansible")
 
 ## iDRAC Server Health Details
+   - The iDRAC health checks are all optional, you can pick which ones you want to monitor.
+
+![iDRAC](/image/idrac-check.png?raw=true)
 
    - The iDRAC health check will provide exhaustive health information and alert upon it.
 

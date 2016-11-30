@@ -1,5 +1,6 @@
 # Check server health via the idrac
-# this is for Dell servers ONLY
+# this == for Dell servers ONLY
+# these values are configurable
 define hostgroup {
 	hostgroup_name idrac
         alias Network Idrac
@@ -15,17 +16,133 @@ define host {
 }
 {% endfor %}
 
-# service checks to be applied to oob interfaces
+{% if idrac_vdisk == true %}
+
+# check vdisks if set to true in all.yml
 define service {
 	use				            generic-service
 	hostgroup_name			    idrac
-	service_description	        iDRAC Server Health
-	check_command			    check_idrac_all 
+	service_description	        iDRAC Server RAID
+	check_command			    check_idrac_vdisk
 	notifications_enabled		1
     # check once an hour
     check_interval              60
 }
+{% endif %}
 
+{% if idrac_disk == true %}
+
+# check disks if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server DISK
+	check_command			    check_idrac_disk
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_ps == true %}
+
+# check ps if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server PSU
+	check_command			    check_idrac_ps
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_fan == true %}
+
+# check FAN if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server FAN
+	check_command			    check_idrac_fan
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_battery == true %}
+
+# check battery if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server BATTERY
+	check_command			    check_idrac_battery
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_pu == true %}
+
+# check power redundancy if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server POWER
+	check_command			    check_idrac_pu
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_mem == true %}
+
+# check memory if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server MEM
+	check_command			    check_idrac_mem
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_sensor == true %}
+
+# check temperature sensors if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server TEMP
+	check_command			    check_idrac_sensor
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+{% if idrac_cpu == true %}
+
+# check cpu if set to true in all.yml
+define service {
+	use				            generic-service
+	hostgroup_name			    idrac
+	service_description	        iDRAC Server CPU
+	check_command			    check_idrac_cpu
+	notifications_enabled		1
+    # check once an hour
+    check_interval              60
+}
+{% endif %}
+
+# service checks for general idrac connectivity.
 # service checks to be applied to idrac interfaces
 define service {
 	use				            local-service

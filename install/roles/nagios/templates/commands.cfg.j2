@@ -32,11 +32,61 @@ define command{
         command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
         }
 
-# 'check_idrac_all' command definition for idracs
+# 'check_idrac_ps' command definition for idracs
 define command{
-        command_name    check_idrac_all
-        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} 
+        command_name    check_idrac_ps
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w PS
 }
+
+# 'check_idrac_fan' command definition for idracs
+define command{
+        command_name    check_idrac_fan
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w FAN
+}
+
+# 'check_idrac_battery' command definition for idracs
+define command{
+        command_name    check_idrac_battery
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w BATTERY
+}
+
+# 'check_idrac_pu' command definition for idracs
+define command{
+        command_name    check_idrac_pu
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w PU
+}
+
+# 'check_idrac_mem' command definition for idracs
+define command{
+        command_name    check_idrac_mem
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w MEM
+}
+
+# 'check_idrac_disk' command definition for idracs
+define command{
+        command_name    check_idrac_disk
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w DISK
+}
+
+# 'check_idrac_vdisk' command definition for idracs
+define command{
+        command_name    check_idrac_vdisk
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w VDISK
+}
+
+# 'check_idrac_sensor' command definition for idracs
+define command{
+        command_name    check_idrac_sensor
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w SENSOR
+}
+
+# 'check_idrac_cpu' command definition for idracs
+define command{
+        command_name    check_idrac_cpu
+        command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w CPU
+}
+
+
 ### You can define more custom commands below for NRPE ###
 #
 #define command {
