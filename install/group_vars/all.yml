@@ -30,7 +30,7 @@ kibana_password: admin
 snmp_mib_path: /usr/share/snmp/mibs
 snmp_opts: -v2c -c public
 # these flag for strings to match failure, warn or ok
-snmp_check_thresholds: --warn '$ALL$' --crit 'critical|nonRecoverable|fail' --ok 'ok|online|on|spunup|full|ready|enabled|presence'
+snmp_check_thresholds: --warn '$ALL$' --crit 'critical|nonRecoverable|fail' --ok 'ok|online|on|spunup|full|ready|enabled|unknown|presence'
 # settings to check for idrac
 # power supply
 idrac_ps: true
