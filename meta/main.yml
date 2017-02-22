@@ -1,0 +1,6 @@
+# Ansible galaxy requirements file
+#
+# Role to setup the Nagios monitoring server and clients
+- src: https://github.com/sadsfae/ansible-nagios
+  name: ansible-nagios
+  version: master
