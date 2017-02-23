@@ -12,6 +12,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      * Generates most of the other configs based on jinja2 templates
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
+     * This is also available via [Ansible Galaxy](https://galaxy.ansible.com/sadsfae/ansible-nagios/)
 
 ## Requirements
    - RHEL7 or CentOS7+ for Nagios server.
