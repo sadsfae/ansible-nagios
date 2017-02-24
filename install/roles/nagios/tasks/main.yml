@@ -132,6 +132,17 @@
     mode=0777
     seuser=system_u
 
+# nagios upgrade to 4.2.4 requires this
+# todo: file bug
+- name: Create nagios results directory
+  file:
+    path=/var/log/nagios/spool/checkresults
+    state=directory
+    owner=nagios
+    group=nagios
+    mode=0755
+    seuser=system_u
+
 # employ lineinfile fix for faulty, shipped nagios systemd service
 - name: Check/fix systemd service file
   lineinfile: dest=/usr/lib/systemd/system/nagios.service \
