@@ -1,16 +1,37 @@
+# NOTE: only put one unique host per category here
+
+# this is your main nagios server and
+# where ansible will deploy it.
 [nagios]
 host-01
 
+# use this for generic Linux servers
 [servers]
 
+# inherits servers checks, includes http
 [webservers]
 
+# elasticsearch, logstash, kibana servers
 [elkservers]
 
+# check only elasticsearch, inherits servers checks
 [elasticsearch]
 
+# icmp check only, see the README
+# for correct syntax as you'll also need ip address
+# e.g. hostname
+# switch01 ansible_host=1.2.3.3
 [switches]
 
+# icmp and http checks, see the README
+# for correct syntax as you'll also need ip address
+# e.g. web02-ipmi ansible_host=1.2.3.4
 [oobservers]
 
+# Dell idrac health checks for the physical server
+# connected to it, see install/group_vars/all.yml
+# for various settings here.  See README
+# for correct syntax as you'll also need the ip
+# address
+# e.g. web01-idrac ansible_host=1.2.3.5
 [idrac]
