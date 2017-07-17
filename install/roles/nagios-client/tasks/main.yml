@@ -99,7 +99,7 @@
   register: iptables_needs_restart
 
 - name: Restart iptables-services for TCP/{{nrpe_tcp_port}} (iptables-services)
-  shell: systemctl restart iptables.service
+  shell: systemctl reload iptables.service
   ignore_errors: true
   when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
 
