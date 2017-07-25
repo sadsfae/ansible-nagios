@@ -16,6 +16,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 
 ## Requirements
    - RHEL7 or CentOS7+ for Nagios server.
+   - Requires ```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
+      - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find them, CentOS7 has them however.
 
 ## Notes
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
@@ -90,6 +92,7 @@ Now restart Nagios and Apache and you should be good to go.
 systemctl restart nagios
 systemctl restart httpd
 ```
+    - If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/)
 
 ## Demonstration
    - You can view a video of the Ansible deployment here:
