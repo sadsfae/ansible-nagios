@@ -31,6 +31,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
        - You can select which checks you want in ```install/group_vars/all.yml```
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
+   - SuperMicro server checks via the IPMI interface.
+         - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
    - Adding new hosts to inventory file will just regenerate the Nagios configs
 
 ## Nagios Server Instructions
@@ -62,6 +64,8 @@ server01
 [idrac]
 database01-idrac ansible_host=192.168.0.106
 
+[supermicro]
+web01-supermicro-ipmi ansible_host=192.168.0.108
 ```
    - Run the playbook
 ```
@@ -106,37 +110,43 @@ systemctl restart httpd
 ```
 .
 ├── hosts
-└── install
-    ├── group_vars
-    │   └── all.yml
-    ├── nagios.yml
-    └── roles
-        ├── nagios
-        │   ├── files
-        │   │   ├── idrac_2.2rc4
-        │   │   ├── idrac-smiv2.mib
-        │   │   ├── localhost.cfg
-        │   │   ├── nagios.cfg
-        │   │   ├── nagios.conf
-        │   │   └── services.cfg
-        │   ├── tasks
-        │   │   └── main.yml
-        │   └── templates
-        │       ├── cgi.cfg.j2
-        │       ├── commands.cfg.j2
-        │       ├── contacts.cfg.j2
-        │       ├── elasticsearch.cfg.j2
-        │       ├── elkservers.cfg.j2
-        │       ├── idrac.cfg.j2
-        │       ├── oobservers.cfg.j2
-        │       ├── servers.cfg.j2
-        │       ├── switches.cfg.j2
-        │       └── webservers.cfg.j2
-        └── nagios-client
-            ├── tasks
-            │   └── main.yml
-            └── templates
-                └── nrpe.cfg.j2
+├── install
+│   ├── group_vars
+│   │   └── all.yml
+│   ├── nagios.yml
+│   └── roles
+│       ├── nagios
+│       │   ├── files
+│       │   │   ├── check_ipmi_sensor
+│       │   │   ├── idrac_2.2rc4
+│       │   │   ├── idrac-smiv2.mib
+│       │   │   ├── localhost.cfg
+│       │   │   ├── nagios.cfg
+│       │   │   ├── nagios.conf
+│       │   │   └── services.cfg
+│       │   ├── tasks
+│       │   │   └── main.yml
+│       │   └── templates
+│       │       ├── cgi.cfg.j2
+│       │       ├── commands.cfg.j2
+│       │       ├── contacts.cfg.j2
+│       │       ├── elasticsearch.cfg.j2
+│       │       ├── elkservers.cfg.j2
+│       │       ├── idrac.cfg.j2
+│       │       ├── ipmi.cfg.j2
+│       │       ├── oobservers.cfg.j2
+│       │       ├── servers.cfg.j2
+│       │       ├── supermicro.cfg.j2
+│       │       ├── switches.cfg.j2
+│       │       └── webservers.cfg.j2
+│       └── nagios-client
+│           ├── tasks
+│           │   └── main.yml
+│           └── templates
+│               └── nrpe.cfg.j2
+└── meta
+    └── main.yml
 
-10 directories, 22 files
+11 directories, 26 files
+
 ```
