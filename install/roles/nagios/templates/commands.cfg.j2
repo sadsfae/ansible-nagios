@@ -15,6 +15,7 @@
 #	command_line	/usr/bin/printf "%b" "#openstack-lab NAGIOS: $NOTIFICATIONTYPE$ - $HOSTALIAS$ is $HOSTSTATE$: $HOSTOUTPUT$ ($$(hostname -s))" | nc -w 1 10.16.17.75 5050
 #}
 #### Define NRPE command here, you need to have this for external host checks #####
+
 define command {
 	command_name                   check_nrpe
 	command_line                   /usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
@@ -24,13 +25,13 @@ define command {
 define command{
         command_name    check_uptime
         command_line    /usr/lib64/nagios/plugins/check_uptime
-        }
+}
 
 # 'check_http' command definition for elk kibana
 define command{
         command_name    check_elk_http
         command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
-        }
+}
 
 # 'check_idrac_ps' command definition for idracs
 define command{
@@ -86,7 +87,39 @@ define command{
         command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w CPU
 }
 
+# check_ipmi_sensor command for supermicro IPMI checks
+define command{
+        command_name    check_smc_cpu
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_cpu}} --nosel
+}
 
+define command{
+        command_name    check_smc_mem
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_mem}} --nosel
+}
+
+define command{
+        command_name    check_smc_disk
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_disk}} --nosel
+}
+
+define command{
+        command_name    check_smc_psu
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_psu}} --nosel
+}
+
+define command{
+        command_name    check_smc_voltage
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_voltage}} --nosel
+}
+
+define command{
+        command_name    check_smc_temp
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_temp}} --nosel
+}
+
+
+### These are OpenStack examples, I am leaving them here for reference
 ### You can define more custom commands below for NRPE ###
 #
 #define command {

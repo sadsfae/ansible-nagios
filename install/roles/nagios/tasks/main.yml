@@ -28,6 +28,10 @@
     - openssl
     - openssl-libs
     - net-snmp-utils
+    - perl-IPC-Run
+    - perl-IO-Tty
+    - freeipmi
+    - OpenIPMI-modalias
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
@@ -80,6 +84,24 @@
 - name: Configure Dell idrac snmp mib file
   copy: src=idrac-smiv2.mib  dest={{snmp_mib_path}}/ mode=0755
 
+- name: Create nagios socket tmp files
+  file:
+    path={{supermicro_ipmicfg_path}}
+    state=directory
+    owner=nagios
+    group=nagios
+    mode=0777
+    seuser=system_u
+
+- name: Configure SuperMicro IPMI Check
+  copy: src=check_ipmi_sensor dest={{nagios_plugin_path}}/ mode=0755
+
+- name: Generate the SuperMicro monitoring template
+  template: src={{ item + ".j2" }}
+            dest={{supermicro_ipmicfg_path}}/{{ item }}
+  with_items:
+    - ipmi.cfg
+
 - name: Configure nagios localhost monitoring
   copy: src=localhost.cfg dest=/etc/nagios/objects/localhost.cfg
 
@@ -98,6 +120,7 @@
     - elkservers.cfg
     - elasticsearch.cfg
     - idrac.cfg
+    - supermicro.cfg
   register: nagios_needs_restart
 
 - name: Generate the nagios contact template

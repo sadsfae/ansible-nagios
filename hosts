@@ -35,3 +35,11 @@ host-01
 # address
 # e.g. web01-idrac ansible_host=1.2.3.5
 [idrac]
+
+# Supermicro SSM health checks, requires the SSM
+# server running somewhere, you'll query this instead of
+# each node.  See README for correct syntax as you'll
+# need the ip address
+# e.g. web02-supermicro-ipmi ansible_host=1.2.3.6
+[supermicro]
+
