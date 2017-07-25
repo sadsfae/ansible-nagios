@@ -30,9 +30,9 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
        - You can select which checks you want in ```install/group_vars/all.yml```
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
+     - SuperMicro server checks via the IPMI interface.
+       - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
-   - SuperMicro server checks via the IPMI interface.
-         - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
    - Adding new hosts to inventory file will just regenerate the Nagios configs
 
 ## Nagios Server Instructions
