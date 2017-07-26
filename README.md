@@ -66,8 +66,13 @@ server01
 [idrac]
 database01-idrac ansible_host=192.168.0.106
 
-[supermicro]
+[supermicro-6048r]
 web01-supermicro-ipmi ansible_host=192.168.0.108
+
+[supermicro-6018r]
+
+[supermicro-1028r]
+
 ```
    - Run the playbook
 ```
@@ -92,7 +97,8 @@ Now restart Nagios and Apache and you should be good to go.
 systemctl restart nagios
 systemctl restart httpd
 ```
-    - If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/)
+
+If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/)
 
 ## Demonstration
    - You can view a video of the Ansible deployment here:
