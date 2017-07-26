@@ -89,12 +89,12 @@ smc1028r_check_temp: true
 # 1028r
 smc1028r_check_cpu_opts: 4,71,2483,2550
 smc1028r_check_mem_opts: 2617,2684,2751,2818
-smc1028r_check_disk_opts: 3957,4024
+smc1028r_check_disk_opts: 4024
 smc1028r_check_temp_opts: 205,272
 # 6048r
 smc6048r_check_cpu_opts: 4,71,2684,2751
 smc6048r_check_mem_opts: 1076,1210,1344,1478,1612,1746
-smc6048r_check_disk_opts: 4158,4225
+smc6048r_check_disk_opts: 4225
 smc6048r_check_temp_opts: 205,272
 # 6018r have no way to check internal flash disk via ipmi
 smc6018r_check_cpu_opts: 4,71,339,406  
