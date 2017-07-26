@@ -1,0 +1,70 @@
+# Supermicro IPMI interface checks for 6048r server type
+define hostgroup {
+	hostgroup_name supermicro-6048r
+    alias Supermicro 6048r IPMI
+}
+
+{% for host in groups['supermicro-6048r'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_host }}
+	hostgroups 		        supermicro-6048r
+    _ipmi_ip                {{ hostvars[host].ansible_host }}
+}
+{% endfor %}
+
+# service checks to be applied to Supermicro IPMI interfaces
+
+{% if smc6048r_check_cpu == true %}
+
+define service {
+	use	                   generic-service
+	hostgroup_name		   supermicro-6048r
+	service_description	   SMC 6048r CPU
+	check_command		   6048r_check_cpu!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	notifications_enabled  1
+    check_interval         30
+}
+
+{% endif %}
+
+{% if smc6048r_check_mem == true %}
+
+define service {
+	use	                   generic-service
+	hostgroup_name		   supermicro-6048r
+	service_description	   SMC 6048r MEM
+	check_command		   6048r_check_mem!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	notifications_enabled  1
+    check_interval         30
+}
+
+{% endif %}
+
+{% if smc6048r_check_disk == true %}
+
+define service {
+	use	                   generic-service
+	hostgroup_name		   supermicro-6048r
+	service_description	   SMC 6048r Disk
+	check_command		   6048r_check_disk!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	notifications_enabled  1
+    check_interval         30
+}
+
+{% endif %}
+
+{% if smc6048r_check_temp == true %}
+
+define service {
+	use	                   generic-service
+	hostgroup_name		   supermicro-6048r
+	service_description	   SMC 6048r Temp
+	check_command		   6048r_check_temp!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	notifications_enabled  1
+    check_interval         30
+}
+
+{% endif %}

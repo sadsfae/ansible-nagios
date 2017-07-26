@@ -63,61 +63,40 @@ disable_unrecognized_events: on
 enable_workaround_flags: nochecksumcheck,noauthcodecheck
 # supermicro individual checks
 # you can make your own, I am only adding the
-# bare basics and grouping by component
-check_smc_cpu: true
-check_smc_mem: true
-check_smc_disk: true
-check_smc_psu: true
-check_smc_voltage: true
-check_smc_temp: true
+# bare basics and grouping by component and type as
+# sensor id values differ across model :(
+# SuperMicro 6018r
+smc6018r_check_cpu: true
+smc6018r_check_mem: true
+smc6018r_check_temp: true
+## SuperMicro 6048r
+smc6048r_check_cpu: true
+smc6048r_check_mem: true
+smc6048r_check_disk: true
+smc6048r_check_temp: true
+## SuperMicro 1028r
+smc1028r_check_cpu: true
+smc1028r_check_mem: true
+smc1028r_check_disk: true
+smc1028r_check_temp: true
 # please see full mapping of sensor id below, you will
 # specify the sensors you want to monitor in a csv format:
 # https://github.com/thomas-krenn/check_ipmi_sensor_v3
-supermicro_check_cpu: 4,71,339,406
-supermicro_check_mem: 2617,2684,2751,2818
-supermicro_check_disk: 3957,4024
-supermicro_check_psu: 3756,3823
-supermicro_check_voltage: 2416,3086,3019,3153,2483,2550
-supermicro_check_temp: 205,272
-#### sensor ID    |  Component | Measurement ####
-#4 | CPU1 Temp |
-#71 | CPU2 Temp |
-#138 | PCH Temp |
-#205 | System Temp |
-#272 | Peripheral Temp |
-#339 | Vcpu1VRM Temp |
-#406 | Vcpu2VRM Temp |
-#473 | VmemABVRM Temp |
-#540 | VmemCDVRM Temp |
-#607 | VmemEFVRM Temp |
-#674 | VmemGHVRM Temp |
-#741 | P1-DIMMA1 Temp |
-#875 | P1-DIMMB1 Temp |
-#1277 | P2-DIMME1 Temp |
-#1411 | P2-DIMMF1 Temp |
-#1813 | FAN1 | Fan |
-#1880 | FAN2 | Fan |
-#1947 | FAN3 | Fan |
-#2014 | FAN4 | Fan |
-#2081 | FANA | Fan |
-#2215 | 12V | Voltage |
-#2282 | 5VCC | Voltage |
-#2349 | 3.3VCC | Voltage |
-#2416 | VBAT | Voltage |
-#2483 | Vcpu1 | Voltage |
-#2550 | Vcpu2 | Voltage |
-#2617 | VDIMMAB | Voltage |
-#2684 | VDIMMCD | Voltage |
-#2751 | VDIMMEF | Voltage |
-#2818 | VDIMMGH | Voltage |
-#2885 | 5VSB | Voltage |
-#2952 | 3.3VSB | Voltage |
-#3019 | 1.5V PCH | Voltage |
-#3086 | 1.2V BMC | Voltage |
-#3153 | 1.05V PCH | Voltage |
-#3220 | Chassis Intru | Physical Security |
-#3756 | PS1 Status | Power Supply |
-#3823 | PS2 Status | Power Supply |
-#3890 | MB/AOM_SAS Temp | Temperature |
-#3957 | HDD Temp        | Temperature |
-#4024 | HDD Status      | Drive Slot |
+# sensor values are different across Supermicro models
+# to obtain them all run:
+# check_ipmi_sensor -H mgmt.ip.address -f /etc/supermicro-ipmi-config/ipmi.cfg -vvv --nosel
+## Sensor Id groupings per model
+# 1028r
+smc1028r_check_cpu_opts: 4,71,2483,2550
+smc1028r_check_mem_opts: 2617,2684,2751,2818
+smc1028r_check_disk_opts: 3957,4024
+smc1028r_check_temp_opts: 205,272
+# 6048r
+smc6048r_check_cpu_opts: 4,71,2684,2751
+smc6048r_check_mem_opts: 1076,1210,1344,1478,1612,1746
+smc6048r_check_disk_opts: 4158,4225
+smc6048r_check_temp_opts: 205,272
+# 6018r have no way to check internal flash disk via ipmi
+smc6018r_check_cpu_opts: 4,71,339,406  
+smc6018r_check_mem_opts: 473,540,607,674,741,808
+smc6018r_check_temp_opts: 205,272

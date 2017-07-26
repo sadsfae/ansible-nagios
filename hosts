@@ -41,5 +41,12 @@ host-01
 # each node.  See README for correct syntax as you'll
 # need the ip address
 # e.g. web02-supermicro-ipmi ansible_host=1.2.3.6
-[supermicro]
+# supermicro have different ipmi sensor ids
+# across models so you need to put them in different
+# inventory groups.
+[supermicro-6048r]
+
+[supermicro-6018r]
+
+[supermicro-1028r]
 

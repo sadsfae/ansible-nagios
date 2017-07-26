@@ -87,35 +87,64 @@ define command{
         command_line    /usr/lib64/nagios/plugins/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w CPU
 }
 
-# check_ipmi_sensor command for supermicro IPMI checks
+# check_ipmi_sensor command for supermicro 6018r IPMI checks
 define command{
-        command_name    check_smc_cpu
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_cpu}} --nosel
+        command_name    6018r_check_cpu
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6018r_check_cpu_opts}} --nosel
 }
 
 define command{
-        command_name    check_smc_mem
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_mem}} --nosel
+        command_name    6018r_check_mem
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6018r_check_mem_opts}} --nosel
 }
 
 define command{
-        command_name    check_smc_disk
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_disk}} --nosel
+        command_name    6018r_check_temp
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6018r_check_temp_opts}} --nosel
+}
+
+# check_ipmi_sensor command for supermicro 6048r IPMI checks
+
+define command{
+        command_name    6048r_check_cpu
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6048r_check_cpu_opts}} --nosel
 }
 
 define command{
-        command_name    check_smc_psu
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_psu}} --nosel
+        command_name    6048r_check_mem
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6048r_check_mem_opts}} --nosel
 }
 
 define command{
-        command_name    check_smc_voltage
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_voltage}} --nosel
+        command_name    6048r_check_disk
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6048r_check_disk_opts}} --nosel
 }
 
 define command{
-        command_name    check_smc_temp
-        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{supermicro_check_temp}} --nosel
+        command_name    6048r_check_temp
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc6048r_check_temp_opts}} --nosel
+}
+
+# check_ipmi_sensor command for supermicro 1028r IPMI checks
+
+define command{
+        command_name    1028r_check_cpu
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc1028r_check_cpu_opts}} --nosel
+}
+
+define command{
+        command_name    1028r_check_mem
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc1028r_check_mem_opts}} --nosel
+}
+
+define command{
+        command_name    1028r_check_disk
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc1028r_check_disk_opts}} --nosel
+}
+
+define command{
+        command_name    1028r_check_temp
+        command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc1028r_check_temp_opts}} --nosel
 }
 
 

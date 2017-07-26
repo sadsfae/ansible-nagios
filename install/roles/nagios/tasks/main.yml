@@ -120,7 +120,9 @@
     - elkservers.cfg
     - elasticsearch.cfg
     - idrac.cfg
-    - supermicro.cfg
+    - supermicro-6018r.cfg
+    - supermicro-6048r.cfg
+    - supermicro-1028r.cfg
   register: nagios_needs_restart
 
 - name: Generate the nagios contact template
