@@ -17,15 +17,17 @@ host-01
 # check only elasticsearch, inherits servers checks
 [elasticsearch]
 
-# icmp check only, see the README
+# icmp and SSH checks only, see the README
 # for correct syntax as you'll also need ip address
 # e.g. hostname
 # switch01 ansible_host=1.2.3.3
 [switches]
 
-# icmp and http checks, see the README
+# icmp, ssh and http checks, see the README
 # for correct syntax as you'll also need ip address
 # e.g. web02-ipmi ansible_host=1.2.3.4
+# this can used for generic out-of-band servers
+# and switched PDU's for example
 [oobservers]
 
 # Dell idrac health checks for the physical server
@@ -36,17 +38,17 @@ host-01
 # e.g. web01-idrac ansible_host=1.2.3.5
 [idrac]
 
-# Supermicro SSM health checks, requires the SSM
-# server running somewhere, you'll query this instead of
-# each node.  See README for correct syntax as you'll
-# need the ip address
+# Supermicro SSM health checks via FreeIPMI
 # e.g. web02-supermicro-ipmi ansible_host=1.2.3.6
 # supermicro have different ipmi sensor ids
 # across models so you need to put them in different
 # inventory groups.
+# Supermicro 6048r 4U models
 [supermicro-6048r]
 
+# Supermicro 6018r 1U server models
 [supermicro-6018r]
 
+# Supermicro 1028r and 1029p models
 [supermicro-1028r]
 

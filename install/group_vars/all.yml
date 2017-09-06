@@ -26,6 +26,11 @@ critical_users: 30
 # https://github.com/sadsfae/ansible-elk
 kibana_user: admin
 kibana_password: admin
+### generic http options for oobserver ###
+# if your generic oobserver http checks need auth
+oobserver_use_auth: false
+oobserver_user: admin
+oobserver_pass: admin
 ### snmp options ###
 # these are for dell idrac only
 snmp_mib_path: /usr/share/snmp/mibs
@@ -97,6 +102,6 @@ smc6048r_check_mem_opts: 1076,1210,1344,1478,1612,1746
 smc6048r_check_disk_opts: 4225
 smc6048r_check_temp_opts: 205,272
 # 6018r have no way to check internal flash disk via ipmi
-smc6018r_check_cpu_opts: 4,71,339,406  
+smc6018r_check_cpu_opts: 4,71,339,406
 smc6018r_check_mem_opts: 473,540,607,674,741,808
 smc6018r_check_temp_opts: 205,272

@@ -33,7 +33,6 @@
   template:
     src=nrpe.cfg.j2
     dest=/etc/nagios/nrpe.cfg
-  register: nrpe_needs_restart
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
@@ -108,7 +107,6 @@
 - name: Start NRPE service
   command: systemctl restart nrpe.service
   ignore_errors: true
-  when: nrpe_needs_restart != 0
 
 - name: Set NRPE to start on boot
   command: systemctl enable nrpe.service
