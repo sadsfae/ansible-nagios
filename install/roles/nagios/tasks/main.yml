@@ -28,10 +28,16 @@
     - openssl
     - openssl-libs
     - net-snmp-utils
-    - perl-IPC-Run
-    - perl-IO-Tty
     - freeipmi
     - OpenIPMI-modalias
+
+- name: Install SuperMicro Perl Dependencies
+  yum: name={{ item }} state=present
+  become: true
+  when: supermicro_enable_checks
+  with_items:
+    - perl-IPC-Run
+    - perl-IO-Tty
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/

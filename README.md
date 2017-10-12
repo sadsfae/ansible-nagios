@@ -16,8 +16,10 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 
 ## Requirements
    - RHEL7 or CentOS7+ for Nagios server.
-   - Requires ```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
-      - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find them, CentOS7 has them however.
+   - If you require SuperMicro server monitoring via IPMI (optional) then do the following
+     - Install```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
+       - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find them, CentOS7 has them however.
+     - Modify ```install/group_vars/all.yml``` to include ```supermicro_enable_checks: true```
 
 ## Notes
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.

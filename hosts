@@ -7,14 +7,17 @@ host-01
 
 # use this for generic Linux servers
 [servers]
+host-02
 
 # inherits servers checks, includes http
 [webservers]
 
-# elasticsearch, logstash, kibana servers
+# inherits server checks, includes http
+# elasticsearch, and logstash
+# kibana should be covered under http
 [elkservers]
 
-# check only elasticsearch, inherits servers checks
+# inherits servers checks, checks elasticsearch
 [elasticsearch]
 
 # icmp and SSH checks only, see the README
@@ -39,6 +42,10 @@ host-01
 [idrac]
 
 # Supermicro SSM health checks via FreeIPMI
+# See: install/group_vars/all.yml
+#      'supermicro_enable_checks: true' required
+#      Requires perl-IPC-Run and perl-IO-Tty
+# See: README notes
 # e.g. web02-supermicro-ipmi ansible_host=1.2.3.6
 # supermicro have different ipmi sensor ids
 # across models so you need to put them in different
