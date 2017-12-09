@@ -108,9 +108,6 @@
   with_items:
     - ipmi.cfg
 
-- name: Configure nagios localhost monitoring
-  copy: src=localhost.cfg dest=/etc/nagios/objects/localhost.cfg
-
 - name: Create generic nagios services config
   copy: src=services.cfg dest=/etc/nagios/
 
@@ -129,13 +126,15 @@
     - supermicro-6018r.cfg
     - supermicro-6048r.cfg
     - supermicro-1028r.cfg
+    - jenkins.cfg  
   register: nagios_needs_restart
 
-- name: Generate the nagios contact template
+- name: Generate the nagios contact template and localhost config
   template: src={{ item + ".j2" }}
             dest=/etc/nagios/objects/{{ item }}
   with_items:
     - contacts.cfg
+    - localhost.cfg
 
 - name: Generate the nagios user CGI template
   template: src={{ item + ".j2" }}
@@ -191,105 +190,6 @@
   command: systemctl daemon-reload
   when: systemd_nagios_changed !=0
 
-### begin firewall ###
-# we need TCP/80 and TCP/443 open
-# determine firewall status and take action
-# 1) use firewall-cmd if firewalld is utilized
-# 2) insert iptables rule if iptables is used
-
-# Firewalld
-- name: Determine if firewalld is in use
-  shell: systemctl is-enabled firewalld.service | egrep -qv 'masked|disabled'
-  ignore_errors: true
-  register: firewalld_in_use
-  no_log: true
-
-- name: Determine if firewalld is active
-  shell: systemctl is-active firewalld.service | grep -vq inactive
-  ignore_errors: true
-  register: firewalld_is_active
-  no_log: true
-
-- name: Determine if TCP/{{nagios_http_port}} is already active
-  shell: firewall-cmd --list-ports | egrep -q "^{{nagios_http_port}}/tcp"
-  ignore_errors: true
-  register: firewalld_nagios_http_port_exists
-  no_log: true
-
-# add firewall rule via firewall-cmd
-- name: Add firewall rule for TCP/{{nagios_http_port}} (firewalld)
-  command: "{{ item }}"
-  with_items:
-    - firewall-cmd --zone=public --add-port={{nagios_http_port}}/tcp --permanent
-    - firewall-cmd --reload
-  ignore_errors: true
-  become: true
-  when: firewalld_in_use.rc == 0 and firewalld_is_active.rc == 0 and firewalld_nagios_http_port_exists.rc != 0
-
-# iptables-services
-- name: check firewall rules for TCP/{{nagios_http_port}} (iptables-services)
-  shell: grep "dport {{nagios_http_port}} \-j ACCEPT" /etc/sysconfig/iptables | wc -l
-  ignore_errors: true
-  register: iptables_nagios_http_port_exists
-  failed_when: iptables_nagios_http_port_exists == 127
-  no_log: true
-
-- name: Add firewall rule for TCP/{{nagios_http_port}} (iptables-services)
-  lineinfile:
-    dest: /etc/sysconfig/iptables
-    line: '-A INPUT -p tcp -m tcp --dport {{nagios_http_port}} -j ACCEPT'
-    regexp: '^INPUT -i lo -j ACCEPT'
-    insertbefore: '-A INPUT -i lo -j ACCEPT'
-    backup: yes
-  when: firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0 and iptables_nagios_http_port_exists.stdout|int == 0
-  register: iptables_needs_restart
-
-- name: Restart iptables-services for TCP/{{nagios_http_port}} (iptables-services)
-  shell: systemctl reload iptables.service
-  ignore_errors: true
-  when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
-
-- name: Determine if TCP/{{nagios_https_port}} is already active
-  shell: firewall-cmd --list-ports | egrep -q "^{{nagios_https_port}}/tcp"
-  ignore_errors: true
-  register: firewalld_nagios_https_port_exists
-  no_log: true
-
-# add firewall rule via firewall-cmd
-- name: Add firewall rule for TCP/{{nagios_https_port}} (firewalld)
-  command: "{{ item }}"
-  with_items:
-    - firewall-cmd --zone=public --add-port={{nagios_https_port}}/tcp --permanent
-    - firewall-cmd --reload
-  ignore_errors: true
-  become: true
-  when: firewalld_in_use.rc == 0 and firewalld_is_active.rc == 0 and firewalld_nagios_https_port_exists.rc != 0
-
-# iptables-services
-- name: check firewall rules for TCP/{{nagios_https_port}} (iptables-services)
-  shell: grep "dport {{nagios_https_port}} \-j ACCEPT" /etc/sysconfig/iptables | wc -l
-  ignore_errors: true
-  register: iptables_nagios_https_port_exists
-  failed_when: iptables_nagios_https_port_exists == 127
-  no_log: true
-
-- name: Add firewall rule for TCP/{{nagios_https_port}} (iptables-services)
-  lineinfile:
-    dest: /etc/sysconfig/iptables
-    line: '-A INPUT -p tcp -m tcp --dport {{nagios_https_port}} -j ACCEPT'
-    regexp: '^INPUT -i lo -j ACCEPT'
-    insertbefore: '-A INPUT -i lo -j ACCEPT'
-    backup: yes
-  when: firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0 and iptables_nagios_https_port_exists.stdout|int == 0
-  register: iptables_needs_restart
-
-- name: Restart iptables-services for TCP/{{nagios_https_port}} (iptables-services)
-  shell: systemctl reload iptables.service
-  ignore_errors: true
-  when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
-
-### end firewall settings ###
-
 - name: Start nagios service
   command: systemctl restart nagios.service
   when: nagios_needs_restart != 0
@@ -307,16 +207,3 @@
   command: systemctl restart httpd.service
   ignore_errors: true
   when: nagios_needs_restart !=0
-
-- name: Display nagios information
-  debug:
-    msg="You can access nagios at https://{{ansible_fqdn}}/nagios using {{nagios_username}} / {{nagios_password}}"
-
-- name: Display nagios guest information
-  debug:
-    msg="Guest read only users at https://{{ansible_fqdn}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
-
-- name: Display user password change information
-  debug:
-    msg="Run the following to change the nagios password --> htpasswd /etc/nagios/passwd nagiosadmin"
-

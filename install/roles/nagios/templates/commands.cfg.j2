@@ -33,6 +33,12 @@ define command{
         command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
 }
 
+# 'check_http' command definition for nginx / reverse proxy TCP/80 for Jenkins
+define command{
+        command_name    check_jenkins_http
+        command_line    $USER1$/check_http -a {{jenkins_user}}:{{jenkins_pass}} -I $HOSTADDRESS$ $ARG1$
+}
+
 # 'check_http' command for oobservers that need auth
 define command{
         command_name    check_oobauth_http

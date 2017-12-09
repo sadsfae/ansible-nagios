@@ -1,0 +1,14 @@
+
+---
+# print informational messages after successful playbook run
+- name: Display nagios information
+  debug:
+    msg="You can access nagios at https://{{ansible_fqdn}}/nagios using {{nagios_username}} / {{nagios_password}}"
+
+- name: Display nagios guest information
+  debug:
+    msg="Guest read only users at https://{{ansible_fqdn}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
+
+- name: Display user password change information
+  debug:
+    msg="Run the following to change the nagios password --> htpasswd /etc/nagios/passwd nagiosadmin"

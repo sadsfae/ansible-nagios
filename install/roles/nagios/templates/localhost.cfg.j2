@@ -122,6 +122,8 @@ define service{
 # Define a service to check the swap usage the local machine. 
 # Critical if less than 10% of swap is free, warning if less than 20% is free
 
+{% if nagios_host_monitor_swap == true %}
+
 define service{
         use                             local-service         ; Name of service template to use
         host_name                       localhost
@@ -129,7 +131,7 @@ define service{
 	check_command			check_local_swap!20!10
         }
 
-
+{% endif %}
 
 # Define a service to check SSH on the local machine.
 # Disable notifications for this service by default, as not all users may have SSH enabled.

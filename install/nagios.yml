@@ -18,9 +18,13 @@
   remote_user: root
   roles:
     - { role: nagios-client }
+    - { role: firewall_client, when: manage_firewall_client }
+    - { role: instructions }
 
 # role for nagios server
 - hosts: nagios
   remote_user: root
   roles:
     - { role: nagios }
+    - { role: firewall, when: manage_firewall }
+    - { role: instructions }

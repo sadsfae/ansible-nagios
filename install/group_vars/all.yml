@@ -1,5 +1,10 @@
 
 ---
+### Firewall management ###
+# Set to true to deploy firewall rules for nagios server
+manage_firewall: true
+# Set to true to deploy firewall rules for client nrpe
+manage_firewall_client: true
 
 ### Nagios Variables ###
 nagios_plugin_path: /usr/lib64/nagios/plugins
@@ -13,6 +18,10 @@ nagios_https_port: 443
 admin_name_01: nagiosadmin
 # change this to your email address if you want notifications
 admin_email_01: nagios@localhost
+# set to false if you don't want to monitor swap
+# on your nagios server
+nagios_host_monitor_swap: true
+
 ### NRPE variables ###
 nrpe_tcp_port: 5666
 # threshold for # of processes
@@ -21,6 +30,20 @@ critical_proc: 1000
 # threshold for # of logged in users
 warning_users: 15
 critical_users: 30
+
+### services ports ###
+# jenkins
+jenkins_port: 8080
+# set to true if you use a reverse proxy
+# like nginx for jenkins
+jenkins_uses_proxy: true
+# username/pass for reverse proxy auth
+jenkins_user: jenkinsadmin
+jenkins_pass: jenkinspass
+
+# elasticsearch
+elasticsearch_port: 9200
+
 ### ELK options ###
 # if you use my ELK playbook you'll need this for HTTP checks
 # https://github.com/sadsfae/ansible-elk
@@ -31,6 +54,7 @@ kibana_password: admin
 oobserver_use_auth: false
 oobserver_user: admin
 oobserver_pass: admin
+
 ### snmp options ###
 # these are for dell idrac only
 snmp_mib_path: /usr/share/snmp/mibs
@@ -56,6 +80,7 @@ idrac_vdisk: true
 idrac_sensor: true
 # system cpu
 idrac_cpu: true
+
 ### SuperMicro IPMI Options ###
 supermicro_ipmi_user: ADMIN
 supermicro_ipmi_pass: ADMIN

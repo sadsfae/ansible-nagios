@@ -30,6 +30,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers plus elasticsearch and Kibana)*
      - elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
      - webservers *(http, ping, ssh, load, users, procs, uptime, disk space)*
+     - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
      - network switches *(ping, ssh)*
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
        - You can select which checks you want in ```install/group_vars/all.yml```
@@ -126,12 +127,20 @@ If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.n
 │   │   └── all.yml
 │   ├── nagios.yml
 │   └── roles
+│       ├── firewall
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── firewall_client
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── instructions
+│       │   └── tasks
+│       │       └── main.yml
 │       ├── nagios
 │       │   ├── files
 │       │   │   ├── check_ipmi_sensor
 │       │   │   ├── idrac_2.2rc4
 │       │   │   ├── idrac-smiv2.mib
-│       │   │   ├── localhost.cfg
 │       │   │   ├── nagios.cfg
 │       │   │   ├── nagios.conf
 │       │   │   └── services.cfg
@@ -145,9 +154,14 @@ If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.n
 │       │       ├── elkservers.cfg.j2
 │       │       ├── idrac.cfg.j2
 │       │       ├── ipmi.cfg.j2
+│       │       ├── jenkins.cfg.j2
+│       │       ├── localhost.cfg.j2
 │       │       ├── oobservers.cfg.j2
 │       │       ├── servers.cfg.j2
-│       │       ├── supermicro.cfg.j2
+│       │       ├── supermicro1028.cfg.j2
+│       │       ├── supermicro-1028r.cfg.j2
+│       │       ├── supermicro-6018r.cfg.j2
+│       │       ├── supermicro-6048r.cfg.j2
 │       │       ├── switches.cfg.j2
 │       │       └── webservers.cfg.j2
 │       └── nagios-client
@@ -158,6 +172,6 @@ If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.n
 └── meta
     └── main.yml
 
-11 directories, 26 files
+17 directories, 33 files
 
 ```
