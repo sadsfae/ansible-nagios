@@ -66,6 +66,9 @@ webserver01-ilo ansible_host=192.168.0.105
 [servers]
 server01
 
+[jenkins]
+jenkins01
+
 [idrac]
 database01-idrac ansible_host=192.168.0.106
 
@@ -86,7 +89,13 @@ ansible-playbook -i hosts install/nagios.yml
 
 ## Known Issues
 
-SELinux doesn't always play well with Nagios, or the policies may be out of date as shipped with CentOS/RHEL.
+* If you're using a non-root Ansible user you will want to edit ```install/group_vars/all.yml``` setting, e.g. AWS EC2:
+
+```
+ansible_system_user: ec2-user
+```
+
+* SELinux doesn't always play well with Nagios, or the policies may be out of date as shipped with CentOS/RHEL.
 ```
 avc:  denied  { create } for  pid=8800 comm="nagios" name="nagios.qh
 ```
@@ -101,7 +110,11 @@ systemctl restart nagios
 systemctl restart httpd
 ```
 
-If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/)
+* If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/) if you opted to include SuperMicro monitoring via:
+
+```
+supermicro_enable_checks: true
+```
 
 ## Demonstration
    - You can view a video of the Ansible deployment here:
