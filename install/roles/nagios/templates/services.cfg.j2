@@ -28,12 +28,19 @@ define service {
         check_command                   check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
 }
 
+# only define this if enabled in group_vars/all.yml
+
+{% if nagios_host_monitor_swap == true %}
+
 define service {
         use                             local-service
         host_name                       localhost
         service_description             Swap Usage
         check_command                   check_local_swap!20!10
 }
+
+{% endif %}
+
 define service {
         use                             local-service
         host_name                       localhost

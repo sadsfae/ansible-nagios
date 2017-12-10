@@ -19,7 +19,6 @@
   roles:
     - { role: nagios-client }
     - { role: firewall_client, when: manage_firewall_client }
-    - { role: instructions }
 
 # role for nagios server
 - hosts: nagios
