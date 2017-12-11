@@ -49,6 +49,7 @@ cd ansible-nagios
 sed -i 's/host-01/yournagioshost/' hosts
 ```
    - Add any hosts for checks in the ```hosts``` inventory
+   - The same host can only belong to **one** host inventory category
    - Note that you need to add ```ansible_host``` entries __only__ for IP addresses for idrac, switches, out-of-band interfaces and anything that typically doesn't support Python and Ansible fact discovery.
    - Anything __not__ an ```idrac```, ```switch``` or ```oobserver``` should use the FQDN (or an /etc/hosts entry) for the inventory hostname or you may see this error:
      - ```AnsibleUndefinedVariable: 'dict object' has no attribute 'ansible_default_ipv4'}```
@@ -100,7 +101,7 @@ ansible_system_user: ec2-user
 
 * SELinux doesn't always play well with Nagios, or the policies may be out of date as shipped with CentOS/RHEL.
 ```
-avc:  denied  { create } for  pid=8800 comm="nagios" name="nagios.qh
+avc: denied { create } for pid=8800 comm="nagios" name="nagios.qh
 ```
    - If you see this (or nagios doesn't start) you'll need to create an SELinux policy module.
 ```
@@ -111,6 +112,10 @@ Now restart Nagios and Apache and you should be good to go.
 ```
 systemctl restart nagios
 systemctl restart httpd
+```
+If all else fails set SELinux to permissive until it's running then run the above command again.
+```
+setenforce 1
 ```
 
 * If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/) if you opted to include SuperMicro monitoring via:
@@ -158,14 +163,14 @@ supermicro_enable_checks: true
 │       │   │   ├── idrac_2.2rc4
 │       │   │   ├── idrac-smiv2.mib
 │       │   │   ├── nagios.cfg
-│       │   │   ├── nagios.conf
-│       │   │   └── services.cfg
+│       │   │   └── nagios.conf
 │       │   ├── tasks
 │       │   │   └── main.yml
 │       │   └── templates
 │       │       ├── cgi.cfg.j2
 │       │       ├── commands.cfg.j2
 │       │       ├── contacts.cfg.j2
+│       │       ├── dns.cfg.j2
 │       │       ├── elasticsearch.cfg.j2
 │       │       ├── elkservers.cfg.j2
 │       │       ├── idrac.cfg.j2
@@ -174,6 +179,7 @@ supermicro_enable_checks: true
 │       │       ├── localhost.cfg.j2
 │       │       ├── oobservers.cfg.j2
 │       │       ├── servers.cfg.j2
+│       │       ├── services.cfg.j2
 │       │       ├── supermicro1028.cfg.j2
 │       │       ├── supermicro-1028r.cfg.j2
 │       │       ├── supermicro-6018r.cfg.j2
@@ -188,6 +194,6 @@ supermicro_enable_checks: true
 └── meta
     └── main.yml
 
-17 directories, 33 files
+17 directories, 34 files
 
 ```
