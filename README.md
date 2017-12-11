@@ -25,13 +25,14 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Creates a read-only user, set ```nagios_create_guest_user: false``` to disable this in ```install/group_vars/all.yml```
    - Implementation is very simple, with the following resource/service checks generated:
-     - generic out-of-band interfaces *(ping, ssh, http)*
-     - generic Linux servers *(ping, ssh, load, users, procs, uptime, disk space)*
+     - Generic out-of-band interfaces *(ping, ssh, http)*
+     - Generic Linux servers *(ping, ssh, load, users, procs, uptime, disk space, swap, zombie procs)*
      - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers plus elasticsearch and Kibana)*
-     - elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
-     - webservers *(http, ping, ssh, load, users, procs, uptime, disk space)*
+     - Elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
+     - Webservers *(same as servers plus 80/TCP for webserver)*
+     - DNS Servers *(same as servers plus UDP/53 for DNS)*
      - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
-     - network switches *(ping, ssh)*
+     - Network switches *(ping, ssh)*
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
        - You can select which checks you want in ```install/group_vars/all.yml```
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
@@ -68,6 +69,8 @@ server01
 
 [jenkins]
 jenkins01
+
+[dns]
 
 [idrac]
 database01-idrac ansible_host=192.168.0.106
