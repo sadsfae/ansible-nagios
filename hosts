@@ -11,6 +11,9 @@ host-01
 # inherits servers checks, includes http
 [webservers]
 
+# inherits server checks, includes DNS check
+[dns]
+
 # inherits server checks, includes http
 # elasticsearch, and logstash
 # kibana should be covered under http

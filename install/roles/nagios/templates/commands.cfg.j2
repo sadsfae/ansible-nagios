@@ -33,6 +33,11 @@ define command{
         command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
 }
 
+# 'check_dns' command definition for DNS Servers
+define command{
+        command_name    check_dns
+        command_line    $USER1$/check_dns -H $HOSTADDRESS$
+}
 # 'check_http' command definition for nginx / reverse proxy TCP/80 for Jenkins
 define command{
         command_name    check_jenkins_http

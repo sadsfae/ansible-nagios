@@ -62,6 +62,7 @@
     - nagios-plugins-procs
     - nagios-plugins-users
     - nagios-plugins-disk
+    - nagios-plugins-dns
     - libsemanage-python
 
 - name: Check nagios Users
@@ -137,6 +138,7 @@
     - supermicro-6048r.cfg
     - supermicro-1028r.cfg
     - jenkins.cfg
+    - dns.cfg
   register: nagios_needs_restart
   become: true
 
