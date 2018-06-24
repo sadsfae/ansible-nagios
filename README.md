@@ -165,6 +165,8 @@ supermicro_enable_checks: true
 │       │   │   ├── idrac-smiv2.mib
 │       │   │   ├── nagios.cfg
 │       │   │   └── nagios.conf
+│       │   ├── handlers
+│       │   │   └── main.yml
 │       │   ├── tasks
 │       │   │   └── main.yml
 │       │   └── templates
@@ -188,6 +190,8 @@ supermicro_enable_checks: true
 │       │       ├── switches.cfg.j2
 │       │       └── webservers.cfg.j2
 │       └── nagios-client
+│           ├── handlers
+│           │   └── main.yml
 │           ├── tasks
 │           │   └── main.yml
 │           └── templates
@@ -195,6 +199,6 @@ supermicro_enable_checks: true
 └── meta
     └── main.yml
 
-17 directories, 34 files
+19 directories, 36 files
 
 ```

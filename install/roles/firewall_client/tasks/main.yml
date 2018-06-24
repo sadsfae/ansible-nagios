@@ -58,11 +58,6 @@
   when: firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0 and iptables_nrpe_tcp_port_exists.stdout|int == 0
   register: iptables_needs_restart
   become: true
-
-- name: Restart iptables-services for TCP/{{nrpe_tcp_port}} (iptables-services)
-  shell: systemctl reload iptables.service
-  ignore_errors: true
-  when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
-  become: true
+  notify: restart iptables
 
 ### end firewall settings ###
