@@ -58,10 +58,10 @@ host-01
 # across models so you need to put them in different
 # inventory groups.
 # Supermicro 6048r 4U models
-[supermicro-6048r]
+[supermicro_6048r]
 
 # Supermicro 6018r 1U server models
-[supermicro-6018r]
+[supermicro_6018r]
 
 # Supermicro 1028r and 1029p models
-[supermicro-1028r]
+[supermicro_1028r]

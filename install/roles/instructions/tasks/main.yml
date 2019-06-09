@@ -1,4 +1,3 @@
-
 ---
 # print informational messages after successful playbook run
 - name: Display nagios information

@@ -86,7 +86,7 @@
 
 - name: Create nagios guest user
   command: htpasswd -b /etc/nagios/passwd {{nagios_ro_username}} {{nagios_ro_password}}
-  when: nagios_create_guest_user
+  when: nagios_create_guest_user|bool
   become: true
 
 - name: Configure nagios main configuration
@@ -139,9 +139,9 @@
     - elkservers.cfg
     - elasticsearch.cfg
     - idrac.cfg
-    - supermicro-6018r.cfg
-    - supermicro-6048r.cfg
-    - supermicro-1028r.cfg
+    - supermicro_6018r.cfg
+    - supermicro_6048r.cfg
+    - supermicro_1028r.cfg
     - jenkins.cfg
     - dns.cfg
   register: nagios_needs_restart

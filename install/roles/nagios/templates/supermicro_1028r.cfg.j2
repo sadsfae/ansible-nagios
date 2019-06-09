@@ -1,16 +1,16 @@
 # Supermicro IPMI interface checks for 1028r server type
 define hostgroup {
-	hostgroup_name supermicro-1028r
+	hostgroup_name supermicro_1028r
     alias Supermicro 1028r IPMI
 }
 
-{% for host in groups['supermicro-1028r'] %}
+{% for host in groups['supermicro_1028r'] %}
 define host {
 	use                     linux-server
 	host_name               {{ host }}
 	alias                   {{ host }}
 	address                 {{ hostvars[host].ansible_host }}
-	hostgroups 		        supermicro-1028r
+	hostgroups 		        supermicro_1028r
     _ipmi_ip                {{ hostvars[host].ansible_host }}
 }
 {% endfor %}
@@ -21,9 +21,9 @@ define host {
 
 define service {
 	use	                   generic-service
-	hostgroup_name		   supermicro-1028r
+	hostgroup_name		   supermicro_1028r
 	service_description	   SMC 1028r CPU
-	check_command		   smc1028r_check_cpu!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	check_command		   1028r_check_cpu!{{supermicro_ipmicfg_path}}/ipmi.cfg
 	notifications_enabled  1
     check_interval         30
 }
@@ -34,9 +34,9 @@ define service {
 
 define service {
 	use	                   generic-service
-	hostgroup_name		   supermicro-1028r
+	hostgroup_name		   supermicro_1028r
 	service_description	   SMC 1028r MEM
-	check_command		   smc1028r_check_mem!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	check_command		   1028r_check_mem!{{supermicro_ipmicfg_path}}/ipmi.cfg
 	notifications_enabled  1
     check_interval         30
 }
@@ -47,9 +47,9 @@ define service {
 
 define service {
 	use	                   generic-service
-	hostgroup_name		   supermicro-1028r
+	hostgroup_name		   supermicro_1028r
 	service_description	   SMC 1028r Disk
-	check_command		   smc1028r_check_disk!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	check_command		   1028r_check_disk!{{supermicro_ipmicfg_path}}/ipmi.cfg
 	notifications_enabled  1
     check_interval         30
 }
@@ -60,9 +60,9 @@ define service {
 
 define service {
 	use	                   generic-service
-	hostgroup_name		   supermicro
+	hostgroup_name		   supermicro_1028r
 	service_description	   SMC 1028r Temp
-	check_command		   smc1028r_check_temp!{{supermicro_ipmicfg_path}}/ipmi.cfg
+	check_command		   1028r_check_temp!{{supermicro_ipmicfg_path}}/ipmi.cfg
 	notifications_enabled  1
     check_interval         30
 }

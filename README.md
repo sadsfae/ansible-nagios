@@ -183,13 +183,12 @@ supermicro_enable_checks: true
 │       │       ├── oobservers.cfg.j2
 │       │       ├── servers.cfg.j2
 │       │       ├── services.cfg.j2
-│       │       ├── supermicro1028.cfg.j2
-│       │       ├── supermicro-1028r.cfg.j2
-│       │       ├── supermicro-6018r.cfg.j2
-│       │       ├── supermicro-6048r.cfg.j2
+│       │       ├── supermicro_1028r.cfg.j2
+│       │       ├── supermicro_6018r.cfg.j2
+│       │       ├── supermicro_6048r.cfg.j2
 │       │       ├── switches.cfg.j2
 │       │       └── webservers.cfg.j2
-│       └── nagios-client
+│       └── nagios_client
 │           ├── handlers
 │           │   └── main.yml
 │           ├── tasks
@@ -199,6 +198,6 @@ supermicro_enable_checks: true
 └── meta
     └── main.yml
 
-19 directories, 36 files
+19 directories, 35 files
 
 ```
