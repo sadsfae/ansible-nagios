@@ -21,7 +21,7 @@
   become: true
 
 - name: Install HTTPD and OpenSSL
-  yum: 
+  yum:
     name:
       - httpd
       - httpd-tools
@@ -33,24 +33,22 @@
       - OpenIPMI-modalias
     state: present
   become: true
-    
 
 - name: Install SuperMicro Perl Dependencies
-  yum: 
-    name: 
+  yum:
+    name:
       - perl-IPC-Run
-      - perl-IO-Tty 
+      - perl-IO-Tty
     state: present
   become: true
-  when: supermicro_enable_checks
-
+  when: supermicro_enable_checks|bool
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
   become: true
 
 - name: Install nagios packages and common plugins
-  yum: 
+  yum:
     name:
       - nagios
       - nagios-common
@@ -69,8 +67,7 @@
       - libsemanage-python
     state: present
   become: true
-  
-    
+
 - name: Check nagios Users
   stat: path=/etc/nagios/passwd
   ignore_errors: true
