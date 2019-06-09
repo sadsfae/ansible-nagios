@@ -21,50 +21,56 @@
   become: true
 
 - name: Install HTTPD and OpenSSL
-  yum: name={{ item }} state=present
+  yum: 
+    name:
+      - httpd
+      - httpd-tools
+      - mod_ssl
+      - openssl
+      - openssl-libs
+      - net-snmp-utils
+      - freeipmi
+      - OpenIPMI-modalias
+    state: present
   become: true
-  with_items:
-    - httpd
-    - httpd-tools
-    - mod_ssl
-    - openssl
-    - openssl-libs
-    - net-snmp-utils
-    - freeipmi
-    - OpenIPMI-modalias
+    
 
 - name: Install SuperMicro Perl Dependencies
-  yum: name={{ item }} state=present
+  yum: 
+    name: 
+      - perl-IPC-Run
+      - perl-IO-Tty 
+    state: present
   become: true
   when: supermicro_enable_checks
-  with_items:
-    - perl-IPC-Run
-    - perl-IO-Tty
+
 
 - name: Setup nagios SSL HTTPD vhost
   copy: src=nagios.conf dest=/etc/httpd/conf.d/
   become: true
 
 - name: Install nagios packages and common plugins
-  yum: name={{ item }} state=present
+  yum: 
+    name:
+      - nagios
+      - nagios-common
+      - nagios-plugins-ssh
+      - nagios-plugins-tcp
+      - nagios-plugins-http
+      - nagios-plugins-load
+      - nagios-plugins-nrpe
+      - nagios-plugins-uptime
+      - nagios-plugins-swap
+      - nagios-plugins-ping
+      - nagios-plugins-procs
+      - nagios-plugins-users
+      - nagios-plugins-disk
+      - nagios-plugins-dns
+      - libsemanage-python
+    state: present
   become: true
-  with_items:
-    - nagios
-    - nagios-common
-    - nagios-plugins-ssh
-    - nagios-plugins-tcp
-    - nagios-plugins-http
-    - nagios-plugins-load
-    - nagios-plugins-nrpe
-    - nagios-plugins-uptime
-    - nagios-plugins-swap
-    - nagios-plugins-ping
-    - nagios-plugins-procs
-    - nagios-plugins-users
-    - nagios-plugins-disk
-    - nagios-plugins-dns
-    - libsemanage-python
-
+  
+    
 - name: Check nagios Users
   stat: path=/etc/nagios/passwd
   ignore_errors: true
