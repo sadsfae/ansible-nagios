@@ -4,6 +4,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 
 ![Nagios](/image/ansible-nagios.png?raw=true)
 
+![CI](https://travis-ci.org/sadsfae/nagios-elk.svg?branch=master)
+
 ## What does it do?
    - Automated deployment of Nagios on CentOS or RHEL
      * Generates service checks, and monitored hosts from Ansible inventory

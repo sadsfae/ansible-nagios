@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.6"
+
+# command to install dependencies
+install:
+  - pip install -r tests/test-requirements.txt
+# command to run tests
+script:
+  - ansible-lint install/nagios.yml -x 303,701,601,301,206 -v
