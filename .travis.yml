@@ -8,3 +8,7 @@ install:
 # command to run tests
 script:
   - ansible-lint install/nagios.yml -x 303,701,601,301,206 -v
+
+# tell galaxy about new builds
+notifications:
+    webhooks: https://galaxy.ansible.com/api/v1/notifications/
