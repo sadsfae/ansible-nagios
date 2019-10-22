@@ -1,4 +1,6 @@
+###################################################
 # NOTE: only put one unique host per category here
+###################################################
 
 # this is your main nagios server and
 # where ansible will deploy it.
@@ -8,11 +10,17 @@ host-01
 # use this for generic Linux servers
 [servers]
 
+# use this for generic Linux servers using mdadm raid
+[servers_with_mdadm_raid]
+
 # inherits servers checks, includes http
 [webservers]
 
 # inherits server checks, includes DNS check
 [dns]
+
+# inherits server checks, includes DNS check and mdadm raid check
+[dns_with_mdadm_raid]
 
 # inherits server checks, includes http
 # elasticsearch, and logstash

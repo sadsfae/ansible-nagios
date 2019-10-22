@@ -22,23 +22,13 @@
 
 - name: Install HTTPD and OpenSSL
   yum:
-    name:
-      - httpd
-      - httpd-tools
-      - mod_ssl
-      - openssl
-      - openssl-libs
-      - net-snmp-utils
-      - freeipmi
-      - OpenIPMI-modalias
+    name: ['httpd', 'httpd-tools', 'mod_ssl', 'openssl', 'net-snmp-utils', 'freeipmi', 'OpenIPMI-modalias']
     state: present
   become: true
 
 - name: Install SuperMicro Perl Dependencies
   yum:
-    name:
-      - perl-IPC-Run
-      - perl-IO-Tty
+    name: ['perl-IPC-Run', 'perl-IO-Tty']
     state: present
   become: true
   when: supermicro_enable_checks|bool
@@ -49,22 +39,7 @@
 
 - name: Install nagios packages and common plugins
   yum:
-    name:
-      - nagios
-      - nagios-common
-      - nagios-plugins-ssh
-      - nagios-plugins-tcp
-      - nagios-plugins-http
-      - nagios-plugins-load
-      - nagios-plugins-nrpe
-      - nagios-plugins-uptime
-      - nagios-plugins-swap
-      - nagios-plugins-ping
-      - nagios-plugins-procs
-      - nagios-plugins-users
-      - nagios-plugins-disk
-      - nagios-plugins-dns
-      - libsemanage-python
+    name: ['nagios', 'nagios-common', 'nagios-plugins-ssh', 'nagios-plugins-tcp', 'nagios-plugins-http', 'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-dns', 'libsemanage-python']
     state: present
   become: true
 
@@ -138,6 +113,7 @@
     - switches.cfg
     - webservers.cfg
     - servers.cfg
+    - servers_with_mdadm_raid.cfg
     - commands.cfg
     - elkservers.cfg
     - elasticsearch.cfg
@@ -147,6 +123,7 @@
     - supermicro_1028r.cfg
     - jenkins.cfg
     - dns.cfg
+    - dns_with_mdadm_raid.cfg
   register: nagios_needs_restart
   become: true
 

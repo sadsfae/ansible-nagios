@@ -208,6 +208,7 @@ command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w {{ warning_p
 command[check_uptime]=/usr/lib64/nagios/plugins/check_uptime
 command[check_tcp_es]=/usr/lib64/nagios/plugins/check_tcp -H localhost -p {{ elasticsearch_port }}
 command[check_jenkins]=/usr/lib64/nagios/plugins/check_tcp -H localhost -p {{ jenkins_port }}
+command[check_raid]=/usr/lib64/nagios/plugins/check_raid
 
 # The following examples allow user-supplied arguments and can
 # only be used if the NRPE daemon was compiled with support for
