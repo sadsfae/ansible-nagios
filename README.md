@@ -29,10 +29,12 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
    - Implementation is very simple, with the following resource/service checks generated:
      - Generic out-of-band interfaces *(ping, ssh, http)*
      - Generic Linux servers *(ping, ssh, load, users, procs, uptime, disk space, swap, zombie procs)*
+     - Generic Linux servers with MDADM RAID (same as above)
      - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers plus elasticsearch and Kibana)*
      - Elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
      - Webservers *(same as servers plus 80/TCP for webserver)*
      - DNS Servers *(same as servers plus UDP/53 for DNS)*
+     - DNS Servers with MDADM RAID (same as above)
      - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
      - Network switches *(ping, ssh)*
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
@@ -40,6 +42,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
      - SuperMicro server checks via the IPMI interface.
        - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
+       - *Note: This is not the best way to monitor things, SNMP checks are WIP once we purchase licenses for them for our systems
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
    - You can turn off creation/management of firewall rules via ```install/group_vars/all.yml```
    - Adding new hosts to inventory file will just regenerate the Nagios configs
@@ -71,10 +74,14 @@ webserver01-ilo ansible_host=192.168.0.105
 [servers]
 server01
 
+[servers_with_mdadm_raid]
+
 [jenkins]
 jenkins01
 
 [dns]
+
+[dns_with_mdadm_raid]
 
 [idrac]
 database01-idrac ansible_host=192.168.0.106
@@ -176,6 +183,7 @@ supermicro_enable_checks: true
 │       │       ├── commands.cfg.j2
 │       │       ├── contacts.cfg.j2
 │       │       ├── dns.cfg.j2
+│       │       ├── dns_with_mdadm_raid.cfg.j2
 │       │       ├── elasticsearch.cfg.j2
 │       │       ├── elkservers.cfg.j2
 │       │       ├── idrac.cfg.j2
@@ -184,6 +192,7 @@ supermicro_enable_checks: true
 │       │       ├── localhost.cfg.j2
 │       │       ├── oobservers.cfg.j2
 │       │       ├── servers.cfg.j2
+│       │       ├── servers_with_mdadm_raid.cfg.j2
 │       │       ├── services.cfg.j2
 │       │       ├── supermicro_1028r.cfg.j2
 │       │       ├── supermicro_6018r.cfg.j2
@@ -191,15 +200,19 @@ supermicro_enable_checks: true
 │       │       ├── switches.cfg.j2
 │       │       └── webservers.cfg.j2
 │       └── nagios_client
+│           ├── files
+│           │   └── check_raid
 │           ├── handlers
 │           │   └── main.yml
 │           ├── tasks
 │           │   └── main.yml
 │           └── templates
 │               └── nrpe.cfg.j2
-└── meta
-    └── main.yml
+├── meta
+│   └── main.yml
+└── tests
+    └── test-requirements.txt
 
-19 directories, 35 files
+21 directories, 39 files
 
 ```
