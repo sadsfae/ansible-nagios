@@ -142,7 +142,7 @@ quads-cli --ls-hosts | sed -e 's/^/mgmt-/g' > /tmp/all_ipmi_2019-10-23
 for ipmi in $(cat all_ipmi_2019-10-23); do printf $ipmi ; echo " ansible_host=$(host $ipmi | awk '{print $NF}')"; done > /tmp/add_oobserver
 ```
 
-Now you can paste `/tmp/add_oobserver' under the `[oobservers]` or `[idrac]` Ansible inventory group respectively.
+Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ansible inventory group respectively.
 
 
 ## Demonstration
