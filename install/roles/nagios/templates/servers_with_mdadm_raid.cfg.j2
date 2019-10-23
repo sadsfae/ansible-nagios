@@ -1,7 +1,7 @@
 # generic Linux servers with an mdadm raid array
 define hostgroup {
 	hostgroup_name servers_raid
-        alias Linux servers_raid
+        alias Linux Servers
 }
 
 {% for host in groups['servers_with_mdadm_raid'] %}

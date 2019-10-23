@@ -134,6 +134,17 @@ setenforce 1
 supermicro_enable_checks: true
 ```
 
+## Mass-generating Ansible Inventory
+If you're using something like [QUADS](https://quads.dev/about-quads) to manage your infrastructure automation scheduling you can do the following to generate all of your out-of-band or iDRAC interfaces.
+
+```
+quads-cli --ls-hosts | sed -e 's/^/mgmt-/g' > /tmp/all_ipmi_2019-10-23
+for ipmi in $(cat all_ipmi_2019-10-23); do printf $ipmi ; echo " ansible_host=$(host $ipmi | awk '{print $NF}')"; done > /tmp/add_oobserver
+```
+
+Now you can paste `/tmp/add_oobserver' under the `[oobservers]` or `[idrac]` Ansible inventory group respectively.
+
+
 ## Demonstration
    - You can view a video of the Ansible deployment here:
 
