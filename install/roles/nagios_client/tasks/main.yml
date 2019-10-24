@@ -10,24 +10,49 @@
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
+  when: ansible_distribution_major_version|int <= 7
+  ignore_errors: true
 
 - name: Check for EPEL repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
+  when: ansible_distribution_major_version|int <= 7
+  ignore_errors: true
 
 - name: Install NRPE and Common Plugins
   yum:
     name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
-    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp', 'libsemanage-python']
+    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
+  when: ansible_distribution_major_version|int <= 7
+  ignore_errors: true
+
+- name: Install NRPE and Common Plugins for Fedora/EL8
+  dnf:
+    name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
+    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
+    state: present
+  become: true
+  when: ansible_distribution_major_version|int >= 8
+  ignore_errors: true
+
+- name: Install libsemanage-python
+  yum:
+    name: ['libsemanage-python']
+    state: present
+  become: true
+  when: ansible_distribution_major_version|int <= 7
+  ignore_errors: true
 
 - name: Setup NRPE client configuration
   template:
     src=nrpe.cfg.j2
     dest=/etc/nagios/nrpe.cfg
+    force=yes
   become: true
+  ignore_errors: true
 
 - name: Copy mdadm check_raid plugin
   copy:
@@ -40,12 +65,14 @@
 - name: Apply SELinux boolean nagios_run_sudo
   seboolean: name=nagios_run_sudo state=yes persistent=yes
   ignore_errors: true
+  when: ansible_distribution_major_version|int <= 7
   become: true
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean logging_syslogd_run_nagios_plugins
   seboolean: name=logging_syslogd_run_nagios_plugins state=yes persistent=yes
   ignore_errors: true
+  when: ansible_distribution_major_version|int <= 7
   become: true
 
 - name: Start NRPE service
