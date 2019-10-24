@@ -111,6 +111,7 @@
 - name: Generate the nagios monitoring templates
   template: src={{ item + ".j2" }}
             dest=/etc/nagios/conf.d/{{ item }}
+            force=yes
   with_items:
     - oobservers.cfg
     - switches.cfg
