@@ -11,14 +11,12 @@
     state=present
   become: true
   when: ansible_distribution_major_version|int <= 7
-  ignore_errors: true
 
 - name: Check for EPEL repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
   when: ansible_distribution_major_version|int <= 7
-  ignore_errors: true
 
 - name: Install NRPE and Common Plugins
   yum:
@@ -27,7 +25,6 @@
     state: present
   become: true
   when: ansible_distribution_major_version|int <= 7
-  ignore_errors: true
 
 - name: Install NRPE and Common Plugins for Fedora/EL8
   dnf:
@@ -36,7 +33,6 @@
     state: present
   become: true
   when: ansible_distribution_major_version|int >= 8
-  ignore_errors: true
 
 - name: Install libsemanage-python
   yum:
@@ -52,7 +48,6 @@
     dest=/etc/nagios/nrpe.cfg
     force=yes
   become: true
-  ignore_errors: true
 
 - name: Copy mdadm check_raid plugin
   copy:
