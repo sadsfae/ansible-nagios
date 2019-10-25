@@ -73,9 +73,23 @@
 - name: Start NRPE service
   command: systemctl restart nrpe.service
   ignore_errors: true
+  when: ansible_distribution_major_version|int >= 7
   become: true
 
 - name: Set NRPE to start on boot
   command: systemctl enable nrpe.service
   ignore_errors: true
+  when: ansible_distribution_major_version|int >= 7
+  become: true
+
+- name: Start NRPE service (EL6)
+  command: service nrpe restart
+  ignore_errors: true
+  when: ansible_distribution_major_version|int <= 6
+  become: true
+
+- name: Set NRPE to start on boot (EL6)
+  command: chkconfig nrpe on
+  ignore_errors: true
+  when: ansible_distribution_major_version|int <= 6
   become: true
