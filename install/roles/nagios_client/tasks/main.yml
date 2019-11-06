@@ -18,6 +18,23 @@
   become: true
   when: ansible_distribution_major_version|int <= 7
 
+- name: Symlink Python to Python3 for EL8/Fedora
+  file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
+  when: ansible_distribution_major_version|int >= 8
+  ignore_errors: true
+
+- name: Check Python Version on EL8/Fedora
+  command: /usr/bin/python --version
+  register: client_python_version
+  when: ansible_distribution_major_version|int >= 8
+
+- name: Switch to Python3 by Default (Fedora/EL8)
+  command: alternatives --install /usr/bin/python python /usr/bin/python3 1
+  when: client_python_version.stdout|int >= 3.6 and ansible_distribution_major_version|int >= 8
+
 - name: Install NRPE and Common Plugins
   yum:
     name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
