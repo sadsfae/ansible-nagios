@@ -1,0 +1,52 @@
+# generic FreeNAS Server
+define hostgroup {
+	hostgroup_name freenas
+        alias FreeNAS freenas
+}
+
+{% for host in groups['freenas'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	hostgroups 		        freenas
+}
+{% endfor %}
+
+# service checks to be applied to the web server
+define service {
+    use                     generic-service
+    hostgroup_name          freenas
+    service_description     PING
+    check_command           check_ping!200.0,20%!600.0,60%
+    notifications_enabled   1
+}
+define service {
+	use				       local-service
+	hostgroup_name		   freenas
+	service_description	   SSH
+	check_command		   check_ssh
+	notifications_enabled  1
+}
+define service {
+	use				       local-service
+	hostgroup_name		   freenas
+	service_description	   Disk Health
+	check_command		   check_freenas_disk
+	notifications_enabled  1
+}
+define service {
+	use				       local-service
+	hostgroup_name		   freenas
+	service_description	   Volume Health
+	check_command		   check_freenas_volume
+	notifications_enabled  1
+}
+define service {
+    use                     local-service
+    hostgroup_name          freenas
+    service_description     Alert Status
+    check_command           check_freenas_alerts
+    notifications_enabled   1
+}

@@ -3,20 +3,21 @@
 
 - name: Check Operating System
   fail:
-    msg="You're not running a supported operating system (CentOS or RHEL 7+)"
-  when: ((ansible_os_family != "RedHat") or (ansible_distribution_major_version|int < 7))
+    msg="You're not running a supported operating system (CentOS, RHEL 7+, Fedora or FreeBSD)"
+  when: ((ansible_os_family != "RedHat" or ansible_os_family != "FreeBSD")
+          and (ansible_distribution_major_version|int < 7))
 
 - name: Import EPEL GPG Key
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
 - name: Check for EPEL repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
 - name: Symlink Python to Python3 for EL8/Fedora
   file:
@@ -24,11 +25,13 @@
     dest: /usr/bin/python
     state: link
   when: ansible_distribution_major_version|int >= 8 and ansible_python_version|int < 3.6
+          and ansible_system == "Linux"
   ignore_errors: true
 
 - name: Switch to Python3 by Default (Fedora/EL8)
   command: alternatives --install /usr/bin/python python /usr/bin/python3 1
   when: ansible_python_version|int < 3.6 and ansible_distribution_major_version|int >= 8
+        and ansible_system == "Linux"
 
 - name: Install NRPE and Common Plugins
   yum:
@@ -36,7 +39,7 @@
     'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
 - name: Install NRPE and Common Plugins for Fedora/EL8
   dnf:
@@ -44,14 +47,33 @@
     'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
-  when: ansible_distribution_major_version|int >= 8
+  when: ansible_distribution_major_version|int >= 8 and ansible_system == "Linux"
+
+- name: Check if BSD ports structure exists
+  stat:
+    path: /usr/ports/net-mgmt/nagios-plugins/distinfo
+  when: ansible_system == "FreeBSD"
+  register: bsd_ports_structure
+  ignore_errors: true
+
+- name: Fetch new BSD ports tree, this might take a while.
+  command: portsnap auto
+  become: true
+  when: ansible_system == "FreeBSD" and bsd_ports_structure.stat.exists
+
+- name: Install NRPE and Common Plugins for FreeBSD
+  pkgng:
+    name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
+    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
+  become: true
+  when: ansible_system == "FreeBSD"
 
 - name: Install libsemanage-python
   yum:
     name: ['libsemanage-python']
     state: present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
   ignore_errors: true
 
 - name: Setup NRPE client configuration
@@ -60,6 +82,7 @@
     dest=/etc/nagios/nrpe.cfg
     force=yes
   become: true
+  when: ansible_system == "FreeBSD" or ansible_system == "Linux"
 
 - name: Copy mdadm check_raid plugin
   copy:
@@ -67,6 +90,7 @@
     dest=/usr/lib64/nagios/plugins/check_raid
     mode="a+x"
   become: true
+  when: ansible_system == "Linux"
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
@@ -88,10 +112,17 @@
   when: ansible_distribution_major_version|int >= 7
   become: true
 
+- name: Start NRPE service on FreeBSD
+  service:
+    name: nrpe3
+    enabled: yes
+    state: restarted
+  when: ansible_system == "FreeBSD"
+
 - name: Set NRPE to start on boot
   command: systemctl enable nrpe.service
   ignore_errors: true
-  when: ansible_distribution_major_version|int >= 7
+  when: ansible_distribution_major_version|int >= 7 and ansible_os_family == "RedHat"
   become: true
 
 - name: Start NRPE service (EL6)

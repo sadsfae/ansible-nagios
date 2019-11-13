@@ -61,6 +61,15 @@ oobserver_use_auth: false
 oobserver_user: admin
 oobserver_pass: admin
 
+### FreeNAS Options
+# change to false if you're using http, which is a bad idea
+# if you're not in an internal, trusted network or VPN.
+freenas_use_ssl: true
+# FreeNAS checks require root credentials or some user created within FreeNAS
+# UI that can access the API with full privileges
+freenas_user: root
+freenas_pass: password
+
 ### snmp options ###
 # these are for dell idrac only
 snmp_mib_path: /usr/share/snmp/mibs

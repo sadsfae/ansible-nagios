@@ -22,6 +22,9 @@ host-01
 # inherits server checks, includes DNS check and mdadm raid check
 [dns_with_mdadm_raid]
 
+# FreeNAS server, see group_vars/all.yml for config options
+[freenas]
+
 # inherits server checks, includes http
 # elasticsearch, and logstash
 # kibana should be covered under http

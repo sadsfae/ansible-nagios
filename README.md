@@ -37,6 +37,7 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
      - DNS Servers *(same as servers plus UDP/53 for DNS)*
      - DNS Servers with MDADM RAID (same as above)
      - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
+     - FreeNAS Appliances *(ping, ssh, volume status, alerts, disk health)*
      - Network switches *(ping, ssh)*
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
        - You can select which checks you want in ```install/group_vars/all.yml```

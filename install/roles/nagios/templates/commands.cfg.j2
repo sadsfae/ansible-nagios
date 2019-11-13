@@ -164,6 +164,21 @@ define command{
         command_line    /usr/lib64/nagios/plugins/check_ipmi_sensor -H $_HOSTIPMI_IP$ -f $ARG1$ -i {{smc1028r_check_temp_opts}} --nosel
 }
 
+### FreeNAS Checks
+define command{
+	command_name	check_freenas_disk
+	command_line	$USER1$/check_freenas.py -H $HOSTADDRESS$ -c disks -u {{freenas_user}} -p {{freenas_pass}}
+}
+
+define command{
+	command_name	check_freenas_volume
+	command_line	$USER1$/check_freenas.py -H $HOSTADDRESS$ -c volumes -u {{freenas_user}} -p {{freenas_pass}}
+}
+
+define command{
+	command_name	check_freenas_alerts
+	command_line	$USER1$/check_freenas.py -H $HOSTADDRESS$ -c alerts -u {{freenas_user}} -p {{freenas_pass}}
+}
 
 ### These are OpenStack examples, I am leaving them here for reference
 ### You can define more custom commands below for NRPE ###
