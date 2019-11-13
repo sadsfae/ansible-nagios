@@ -141,7 +141,7 @@
     - localhost.cfg
   become: true
 
-- name: Generated templated FreeNAS Python status script
+- name: Generate templated FreeNAS Python status script based on SSL settings
   template: src={{ item + ".j2" }}
             dest=/usr/lib64/nagios/plugins/check_freenas.py
             force=yes

@@ -1,24 +1,31 @@
 ansible-nagios
 ==============
-Ansible Playbook for setting up the Nagios monitoring system and clients on CentOS/RHEL.
+Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fedora/FreeBSD)
 
 ![Nagios](/image/ansible-nagios.png?raw=true)
 
 [![CI](https://travis-ci.org/sadsfae/ansible-nagios.svg?branch=master)](https://travis-ci.org/sadsfae/ansible-nagios)
 
 ## What does it do?
-   - Automated deployment of Nagios on CentOS or RHEL
-     * Generates service checks, and monitored hosts from Ansible inventory
-     * Generates comprehensive checks for the Nagios server
+   - Automated deployment of Nagios Server on CentOS7 or RHEL7
+   - Automated deployment of Nagios client on CentOS6/7/8, RHEL6,7,8, Fedora and FreeBSD
+     * Generates service checks and monitored hosts from Ansible inventory
+     * Generates comprehensive checks for the Nagios server itself
      * Generates comprehensive checks for all hosts/services via NRPE
      * Generates most of the other configs based on jinja2 templates
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
      * This is also available via [Ansible Galaxy](https://galaxy.ansible.com/sadsfae/ansible-nagios/)
 
+## How do I use it?
+   - Add your nagios server under `[nagios]` in `hosts` inventory
+   - Add respective services/hosts under their inventory group, **hosts can only belong under one group.**
+   - Take a look at `install/group_vars/all.yml` to change anything like email address, nagios user, guest user etc.
+   - Run the playbook.  Read below for more details if needed.
+
 ## Requirements
-   - RHEL7 or CentOS7 for Nagios server.
-   - RHEL6/7/8 or CentOS6/7/8 or Fedora for Nagios client
+   - RHEL7 or CentOS7 for Nagios server only.
+   - RHEL6/7/8, CentOS6/7/8, Fedora or FreeBSD for the NRPE Nagios client
    - If you require SuperMicro server monitoring via IPMI (optional) then do the following
      - Install```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
        - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find them, CentOS7 has them however.
@@ -27,6 +34,10 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
 ## Notes
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
    - Creates a read-only user, set ```nagios_create_guest_user: false``` to disable this in ```install/group_vars/all.yml```
+   - You can turn off creation/management of firewall rules via ```install/group_vars/all.yml```
+   - Adding new hosts to inventory file will just regenerate the Nagios configs
+
+## Supported Service Checks
    - Implementation is very simple, with the following resource/service checks generated:
      - Generic out-of-band interfaces *(ping, ssh, http)*
      - Generic Linux servers *(ping, ssh, load, users, procs, uptime, disk space, swap, zombie procs)*
@@ -44,10 +55,8 @@ Ansible Playbook for setting up the Nagios monitoring system and clients on Cent
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
      - SuperMicro server checks via the IPMI interface.
        - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
-       - *Note: This is not the best way to monitor things, SNMP checks are WIP once we purchase licenses for them for our systems
+       - *Note: This is **not** the best way to monitor things, SNMP checks are WIP once we purchase licenses for them for our systems
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
-   - You can turn off creation/management of firewall rules via ```install/group_vars/all.yml```
-   - Adding new hosts to inventory file will just regenerate the Nagios configs
 
 ## Nagios Server Instructions
    - Clone repo and setup your Ansible inventory (hosts) file
@@ -182,6 +191,7 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 │       │       └── main.yml
 │       ├── nagios
 │       │   ├── files
+│       │   │   ├── bsd_check_uptime.sh
 │       │   │   ├── check_ipmi_sensor
 │       │   │   ├── idrac_2.2rc4
 │       │   │   ├── idrac-smiv2.mib
@@ -193,12 +203,14 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 │       │   │   └── main.yml
 │       │   └── templates
 │       │       ├── cgi.cfg.j2
+│       │       ├── check_freenas.py.j2
 │       │       ├── commands.cfg.j2
 │       │       ├── contacts.cfg.j2
 │       │       ├── dns.cfg.j2
 │       │       ├── dns_with_mdadm_raid.cfg.j2
 │       │       ├── elasticsearch.cfg.j2
 │       │       ├── elkservers.cfg.j2
+│       │       ├── freenas.cfg.j2
 │       │       ├── idrac.cfg.j2
 │       │       ├── ipmi.cfg.j2
 │       │       ├── jenkins.cfg.j2
@@ -214,6 +226,7 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 │       │       └── webservers.cfg.j2
 │       └── nagios_client
 │           ├── files
+│           │   ├── bsd_check_uptime.sh
 │           │   └── check_raid
 │           ├── handlers
 │           │   └── main.yml
@@ -226,6 +239,6 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 └── tests
     └── test-requirements.txt
 
-21 directories, 39 files
+21 directories, 43 files
 
 ```
