@@ -180,6 +180,43 @@ define command{
 	command_line	$USER1$/check_freenas.py -H $HOSTADDRESS$ -c alerts -u {{freenas_user}} -p {{freenas_pass}}
 }
 
+# bsd_check_swap command definition
+define command{
+        command_name    bsd_check_swap
+        command_line    /usr/local/libexec/nagios/check_swap
+}
+
+# bsd_check_users command definition
+define command{
+        command_name    bsd_check_users
+        command_line    /usr/local/libexec/nagios/check_users
+}
+
+# bsd_check_load command definition
+define command{
+        command_name    bsd_check_load
+        command_line    /usr/local/libexec/nagios/check_load
+}
+
+# bsd_check_disk command definition
+define command{
+        command_name    bsd_check_disk
+        command_line    /usr/local/libexec/nagios/check_disk
+}
+
+# bsd_check_procs command definition
+define command{
+        command_name    bsd_check_procs
+        command_line    /usr/local/libexec/nagios/check_procs
+}
+
+# bsd_check_procs command definition
+define command{
+        command_name    bsd_check_uptime
+        command_line    /usr/local/libexec/nagios/bsd_check_uptime 
+}
+
+
 ### These are OpenStack examples, I am leaving them here for reference
 ### You can define more custom commands below for NRPE ###
 #

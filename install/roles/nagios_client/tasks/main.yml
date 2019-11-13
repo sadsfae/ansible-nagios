@@ -61,10 +61,9 @@
   become: true
   when: ansible_system == "FreeBSD" and bsd_ports_structure.stat.exists
 
-- name: Install NRPE and Common Plugins for FreeBSD
+- name: Install NRPE and Common Plugins for FreeBSD, this might take a while.
   pkgng:
-    name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
-    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
+    name: ['nrpe3', 'nagios-plugins']
   become: true
   when: ansible_system == "FreeBSD"
 
@@ -82,7 +81,15 @@
     dest=/etc/nagios/nrpe.cfg
     force=yes
   become: true
-  when: ansible_system == "FreeBSD" or ansible_system == "Linux"
+  when: ansible_system == "Linux"
+
+- name: Setup NRPE client configuration on FreeBSD
+  template:
+    src=nrpe.cfg.j2
+    dest=/usr/local/etc/nrpe.cfg
+    force=yes
+  become: true
+  when: ansible_system == "FreeBSD"
 
 - name: Copy mdadm check_raid plugin
   copy:
@@ -91,6 +98,14 @@
     mode="a+x"
   become: true
   when: ansible_system == "Linux"
+
+- name: Copy uptime check tool for FreeBSD
+  copy:
+    src=bsd_check_uptime.sh
+    dest=/usr/local/libexec/nagios/bsd_check_uptime
+    mode="a+x"
+  become: true
+  when: ansible_system == "FreeBSD"
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
@@ -109,8 +124,16 @@
 - name: Start NRPE service
   command: systemctl restart nrpe.service
   ignore_errors: true
-  when: ansible_distribution_major_version|int >= 7
+  when: ansible_distribution_major_version|int >= 7 and ansible_system == "Linux"
   become: true
+
+- name: Enable NRPE service on FreeBSD
+  lineinfile:
+    path: /etc/rc.conf
+    line: nrpe3_enable="YES"
+    state: present
+    backup: yes
+  when: ansible_system == "FreeBSD"
 
 - name: Start NRPE service on FreeBSD
   service:

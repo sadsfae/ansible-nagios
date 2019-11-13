@@ -7,7 +7,7 @@
 [nagios]
 host-01
 
-# use this for generic Linux servers
+# use this for generic Linux or FreeBSD servers
 [servers]
 
 # use this for generic Linux servers using mdadm raid
