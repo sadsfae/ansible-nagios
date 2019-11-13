@@ -42,7 +42,7 @@
     name: ['nagios', 'nagios-common', 'nagios-plugins-ssh', 'nagios-plugins-tcp', 'nagios-plugins-http',
     'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap',
     'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk',
-    'nagios-plugins-dns', 'libsemanage-python']
+    'nagios-plugins-dns', 'libsemanage-python', python-requests]
     state: present
   become: true
 
@@ -128,16 +128,31 @@
     - jenkins.cfg
     - dns.cfg
     - dns_with_mdadm_raid.cfg
+    - freenas.cfg
   register: nagios_needs_restart
   become: true
 
 - name: Generate the nagios contact template and localhost config
   template: src={{ item + ".j2" }}
             dest=/etc/nagios/objects/{{ item }}
+            force=yes
   with_items:
     - contacts.cfg
     - localhost.cfg
   become: true
+
+- name: Generated templated FreeNAS Python status script
+  template: src={{ item + ".j2" }}
+            dest=/usr/lib64/nagios/plugins/check_freenas.py
+            force=yes
+  with_items:
+    - check_freenas.py
+  become: true
+
+- name: Make FreeNAS Python status script executable
+  file:
+    dest: /usr/lib64/nagios/plugins/check_freenas.py
+    mode: a+x
 
 - name: Generate the nagios user CGI template
   template: src={{ item + ".j2" }}
