@@ -2,17 +2,20 @@
 # ------------------------------------------------------------------
 # Author: Patrick Byrne
 # Copyright: Patrick Byrne (2017)
+# Modified by: Will Foster @sadsfae
 # License: Apache 2.0
 # Title: check_freenas.py
 # Description:
 #      Nagios type plugin to check Freenas health status
 #
 # ------------------------------------------------------------------
+#  Updated: cleaned up API response message payload
+#  Updated: quieted urllib errors when using self-signed SSL certs
 #  Todo:
 #   Add storage utilization check
 # ------------------------------------------------------------------
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 # ------------------------------------------------------------------
 
@@ -21,6 +24,7 @@ import json
 import sys
 import requests
 import urllib3
+import re
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class FreenasAPI(object):
@@ -115,7 +119,11 @@ class FreenasAPI(object):
     def check_alerts(self):
         # Get alert status on the device
         alert_status = self._request('system/alert')
-        print (alert_status)
+        # fix: clean up status a little bit
+        # we really only want the message payload
+        status_string = str(alert_status)
+        message = re.compile("message(.*)id")
+        print (message.search(status_string).group(1))
         sys.exit (0)
 
         # Return OK if all volumes are healthy
