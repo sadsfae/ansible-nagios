@@ -9,12 +9,12 @@
 # we skip switches/oobservers because they normally don't
 # have python installed.
 
-- hosts: all:!switches:!oobservers:!idrac:!supermicro_6048r:!supermicro_6018r:!supermicro_1028r
+- hosts: all:!switches:!oobservers:!idrac:!supermicro_6048r:!supermicro_6018r:!supermicro_1028r:!devices
   remote_user: "{{ ansible_system_user }}"
   tasks: []
 
 # role for nagios clients via NRPE
-- hosts: all:!switches:!oobservers:!nagios:!idrac:!supermicro_6048r:!supermicro_6018r:!supermicro_1028r:!freenas
+- hosts: all:!switches:!oobservers:!nagios:!idrac:!supermicro_6048r:!supermicro_6018r:!supermicro_1028r:!freenas:!devices
   remote_user: "{{ ansible_system_user }}"
   roles:
     - { role: nagios_client }
