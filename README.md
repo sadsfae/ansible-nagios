@@ -50,6 +50,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fe
      - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
      - FreeNAS Appliances *(ping, ssh, volume status, alerts, disk health)*
      - Network switches *(ping, ssh)*
+     - IoT and ping-only devices *(ping)*
      - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
        - You can select which checks you want in ```install/group_vars/all.yml```
          - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
@@ -191,7 +192,6 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 │       │       └── main.yml
 │       ├── nagios
 │       │   ├── files
-│       │   │   ├── bsd_check_uptime.sh
 │       │   │   ├── check_ipmi_sensor
 │       │   │   ├── idrac_2.2rc4
 │       │   │   ├── idrac-smiv2.mib
@@ -206,6 +206,7 @@ Now you can paste `/tmp/add_oobserver` under the `[oobservers]` or `[idrac]` Ans
 │       │       ├── check_freenas.py.j2
 │       │       ├── commands.cfg.j2
 │       │       ├── contacts.cfg.j2
+│       │       ├── devices.cfg.j2
 │       │       ├── dns.cfg.j2
 │       │       ├── dns_with_mdadm_raid.cfg.j2
 │       │       ├── elasticsearch.cfg.j2

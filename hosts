@@ -51,6 +51,12 @@ host-01
 # and switched PDU's for example
 [oobservers]
 
+# icmp only and ping only devices like IoT
+# or things that you only want to check are online
+# use format like oobservers or switches
+# device01 ansible_host=1.2.3.3
+[devices]
+
 # Dell idrac health checks for the physical server
 # connected to it, see install/group_vars/all.yml
 # for various settings here.  See README

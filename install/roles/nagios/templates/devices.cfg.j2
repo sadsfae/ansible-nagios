@@ -1,0 +1,27 @@
+# ping only devices
+# this is for devices that only want ICMP monitored
+
+define hostgroup {
+	hostgroup_name devices
+        alias Devices
+}
+
+{% for host in groups['devices'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_host }}
+	hostgroups 		        devices
+}
+{% endfor %}
+
+# service checks to be applied to ping only devices
+
+define service {
+	use				            generic-service
+	hostgroup_name			    devices
+	service_description	        PING
+	check_command			    check_ping!200.0,20%!600.0,60%
+	notifications_enabled		1
+}
