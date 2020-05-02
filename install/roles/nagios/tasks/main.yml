@@ -130,6 +130,7 @@
     - dns_with_mdadm_raid.cfg
     - freenas.cfg
     - devices.cfg
+    - dns_only.cfg
   register: nagios_needs_restart
   become: true
 

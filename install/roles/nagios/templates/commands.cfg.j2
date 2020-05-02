@@ -36,7 +36,7 @@ define command{
 # 'check_dns' command definition for DNS Servers
 define command{
         command_name    check_dns
-        command_line    $USER1$/check_dns -H $HOSTADDRESS$ -q ANY
+        command_line    $USER1$/check_dns -s $HOSTADDRESS$ -H {{dns_check_domain}}
 }
 # 'check_http' command definition for nginx / reverse proxy TCP/80 for Jenkins
 define command{
@@ -213,7 +213,7 @@ define command{
 # bsd_check_procs command definition
 define command{
         command_name    bsd_check_uptime
-        command_line    /usr/local/libexec/nagios/bsd_check_uptime 
+        command_line    /usr/local/libexec/nagios/bsd_check_uptime
 }
 
 
