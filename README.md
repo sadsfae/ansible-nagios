@@ -47,6 +47,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fe
      - Webservers *(same as servers plus 80/TCP for webserver)*
      - DNS Servers *(same as servers plus UDP/53 for DNS)*
      - DNS Servers with MDADM RAID (same as above)
+     - DNS Service Only (DNS and ICMP check)
      - Jenkins CI *(same as servers plus TCP/8080 for Jenkins and optional nginx reverse proxy with auth)*
      - FreeNAS Appliances *(ping, ssh, volume status, alerts, disk health)*
      - Network switches *(ping, ssh)*
