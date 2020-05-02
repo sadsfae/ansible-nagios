@@ -1,0 +1,36 @@
+# dns/ping query only against dns service
+# this is for devices that only dns and ICMP monitored
+
+define hostgroup {
+	hostgroup_name dns_only
+        alias DNS Service
+}
+
+{% for host in groups['dns_only'] %}
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_host }}
+	hostgroups 		        dns_only
+}
+{% endfor %}
+
+# service checks to be applied to ping only devices
+
+define service {
+	use				            generic-service
+	hostgroup_name			    dns_only
+	service_description	        PING
+	check_command			    check_ping!200.0,20%!600.0,60%
+	notifications_enabled		1
+}
+
+define service {
+	use				       local-service
+	hostgroup_name		   dns_only
+	service_description	   DNS
+	check_command		   check_dns
+	notifications_enabled  1
+}
+

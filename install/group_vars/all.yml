@@ -61,6 +61,10 @@ oobserver_use_auth: false
 oobserver_user: admin
 oobserver_pass: admin
 
+### DNS Service Options
+# dns domain you want service checks to query
+dns_check_domain: example.com
+
 ### FreeNAS Options
 # change to false if you're using http, which is a bad idea
 # if you're not in an internal, trusted network or VPN.
