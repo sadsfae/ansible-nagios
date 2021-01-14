@@ -60,6 +60,9 @@ kibana_password: admin
 oobserver_use_auth: false
 oobserver_user: admin
 oobserver_pass: admin
+# follow 301 / redirects with check_http by default
+# otherwise set this to false.
+check_http_301_ok: true
 
 ### DNS Service Options
 # dns domain you want service checks to query
