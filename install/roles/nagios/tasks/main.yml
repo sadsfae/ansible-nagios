@@ -143,6 +143,12 @@
     - localhost.cfg
   become: true
 
+- name: Generate additional commands.cfg from template
+  template: src=objects_commands.cfg.j2
+            dest=/etc/nagios/objects/commands.cfg
+            force=yes
+  become: true
+
 - name: Generate templated FreeNAS Python status script based on SSL settings
   template: src={{ item + ".j2" }}
             dest=/usr/lib64/nagios/plugins/check_freenas.py
