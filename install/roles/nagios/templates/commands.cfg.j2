@@ -27,29 +27,53 @@ define command{
         command_line    /usr/lib64/nagios/plugins/check_uptime
 }
 
+{% if check_http_301_ok == true %}
 # 'check_http' command definition for elk kibana
 define command{
         command_name    check_elk_http
         command_line    $USER1$/check_http -f ok -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
 }
+{% endif %}
 
+{% if check_http_301_ok == false %}
+# 'check_http' command definition for elk kibana
+define command{
+        command_name    check_elk_http
+        command_line    $USER1$/check_http -a {{kibana_user}}:{{kibana_password}} -I $HOSTADDRESS$ $ARG1$
+}
+{% endif %}
 # 'check_dns' command definition for DNS Servers
 define command{
         command_name    check_dns
         command_line    $USER1$/check_dns -s $HOSTADDRESS$ -H {{dns_check_domain}}
 }
+{% if check_http_301_ok == true %}
 # 'check_http' command definition for nginx / reverse proxy TCP/80 for Jenkins
 define command{
         command_name    check_jenkins_http
         command_line    $USER1$/check_http -f ok -a {{jenkins_user}}:{{jenkins_pass}} -I $HOSTADDRESS$ $ARG1$
 }
-
+{% endif %}
+{% if check_http_301_ok == false %}
+# 'check_http' command definition for nginx / reverse proxy TCP/80 for Jenkins
+define command{
+        command_name    check_jenkins_http
+        command_line    $USER1$/check_http -a {{jenkins_user}}:{{jenkins_pass}} -I $HOSTADDRESS$ $ARG1$
+}
+{% endif %}
+{% if check_http_301_ok == true %}
 # 'check_http' command for oobservers that need auth
 define command{
         command_name    check_oobauth_http
         command_line    $USER1$/check_http -f ok -a {{oobserver_user}}:{{oobserver_pass}} -I $HOSTADDRESS$ $ARG1$
 }
-
+{% endif %}
+{% if check_http_301_ok == false %}
+define command{
+        command_name    check_oobauth_http
+        command_line    $USER1$/check_http -a {{oobserver_user}}:{{oobserver_pass}} -I $HOSTADDRESS$ $ARG1$
+}
+{% endif %}
 # 'check_idrac_ps' command definition for idracs
 define command{
         command_name    check_idrac_ps
