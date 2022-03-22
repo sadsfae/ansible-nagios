@@ -3,35 +3,35 @@
 
 - name: Check Operating System
   fail:
-    msg="You're not running a supported operating system (CentOS or RHEL 7+)"
-  when:
-    - ansible_os_family != "RedHat"
-    - ansible_os_family != "Rocky"
-    - ansible_distribution_major_version|int < 7
+    msg="You're not running a supported operating system (CentOS, RHEL 7+, Fedora or FreeBSD)"
+  when: ((ansible_os_family != "RedHat" or ansible_os_family != "FreeBSD")
+          and (ansible_distribution_major_version|int < 7))
 
-- name: Import EPEL7 GPG Key
+- name: Import EPEL GPG Key
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
-  when: ansible_distribution_major_version|int == 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
-- name: Import EPEL8 GPG Key
-  rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
-    state=present
-  become: true
-  when: ansible_distribution_major_version|int == 8
-
-- name: Check for EPEL7 repo
+- name: Check for EPEL repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
-  when: ansible_distribution_major_version|int == 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
-- name: Check for EPEL8 repo
-  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    state=present
-  become: true
-  when: ansible_distribution_major_version|int == 8
+- name: Symlink Python to Python3 for EL8/Fedora
+  file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
+  when: ansible_distribution_major_version|int >= 8 and ansible_python_version|int < 3.6
+          and ansible_system == "Linux"
+  ignore_errors: true
+
+- name: Switch to Python3 by Default (Fedora/EL8)
+  command: alternatives --install /usr/bin/python python /usr/bin/python3 1
+  when: ansible_python_version|int < 3.6 and ansible_distribution_major_version|int >= 8
+        and ansible_system == "Linux"
 
 - name: Install NRPE and Common Plugins
   yum:
@@ -39,7 +39,7 @@
     'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
 - name: Install NRPE and Common Plugins for Fedora/EL8
   dnf:
@@ -47,14 +47,32 @@
     'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
-  when: ansible_distribution_major_version|int >= 8
+  when: ansible_distribution_major_version|int >= 8 and ansible_system == "Linux"
+
+- name: Check if BSD ports structure exists
+  stat:
+    path: /usr/ports/net-mgmt/nagios-plugins/distinfo
+  when: ansible_system == "FreeBSD"
+  register: bsd_ports_structure
+  ignore_errors: true
+
+- name: Fetch new BSD ports tree, this might take a while.
+  command: portsnap auto
+  become: true
+  when: ansible_system == "FreeBSD" and bsd_ports_structure.stat.exists
+
+- name: Install NRPE and Common Plugins for FreeBSD, this might take a while.
+  pkgng:
+    name: ['nrpe3', 'nagios-plugins']
+  become: true
+  when: ansible_system == "FreeBSD"
 
 - name: Install libsemanage-python
   yum:
     name: ['libsemanage-python']
     state: present
   become: true
-  when: ansible_distribution_major_version|int <= 7
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
   ignore_errors: true
 
 - name: Setup NRPE client configuration
@@ -63,6 +81,15 @@
     dest=/etc/nagios/nrpe.cfg
     force=yes
   become: true
+  when: ansible_system == "Linux"
+
+- name: Setup NRPE client configuration on FreeBSD
+  template:
+    src=nrpe.cfg.j2
+    dest=/usr/local/etc/nrpe.cfg
+    force=yes
+  become: true
+  when: ansible_system == "FreeBSD"
 
 - name: Copy mdadm check_raid plugin
   copy:
@@ -70,6 +97,15 @@
     dest=/usr/lib64/nagios/plugins/check_raid
     mode="a+x"
   become: true
+  when: ansible_system == "Linux"
+
+- name: Copy uptime check tool for FreeBSD
+  copy:
+    src=bsd_check_uptime.sh
+    dest=/usr/local/libexec/nagios/bsd_check_uptime
+    mode="a+x"
+  become: true
+  when: ansible_system == "FreeBSD"
 
 # SELinux boolean for nagios
 - name: Apply SELinux boolean nagios_run_sudo
@@ -88,9 +124,38 @@
 - name: Start NRPE service
   command: systemctl restart nrpe.service
   ignore_errors: true
+  when: ansible_distribution_major_version|int >= 7 and ansible_system == "Linux"
   become: true
+
+- name: Enable NRPE service on FreeBSD
+  lineinfile:
+    path: /etc/rc.conf
+    line: nrpe3_enable="YES"
+    state: present
+    backup: yes
+  when: ansible_system == "FreeBSD"
+
+- name: Start NRPE service on FreeBSD
+  service:
+    name: nrpe3
+    enabled: yes
+    state: restarted
+  when: ansible_system == "FreeBSD"
 
 - name: Set NRPE to start on boot
   command: systemctl enable nrpe.service
   ignore_errors: true
+  when: ansible_distribution_major_version|int >= 7 and ansible_os_family == "RedHat"
+  become: true
+
+- name: Start NRPE service (EL6)
+  command: service nrpe restart
+  ignore_errors: true
+  when: ansible_distribution_major_version|int <= 6
+  become: true
+
+- name: Set NRPE to start on boot (EL6)
+  command: chkconfig nrpe on
+  ignore_errors: true
+  when: ansible_distribution_major_version|int <= 6
   become: true
