@@ -3,21 +3,43 @@
 
 - name: Check Operating System
   fail:
-    msg="You're not running a supported operating system (CentOS, RHEL 7+, Fedora or FreeBSD)"
+    msg="You're not running a supported operating system (CentOS, RHEL 7+, Rocky, Fedora or FreeBSD)"
   when: ((ansible_os_family != "RedHat" or ansible_os_family != "FreeBSD")
           and (ansible_distribution_major_version|int < 7))
+  when:
+    - ansible_os_family != "RedHat"
+    - ansible_os_family != "Rocky"
+    - ansible_distribution_major_version|int < 7
+    - ansible_os_family != "FreeBSD
 
-- name: Import EPEL GPG Key
+- name: Import EPEL7 GPG Key
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
   when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
-- name: Check for EPEL repo
+- name: Import EPEL8 GPG Key
+  rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    state=present
+  become: true
+  when:
+    - ansible_distribution_major_version|int <= 8
+    - ansible_os_family == "RedHat"
+    - ansible_os_family == "Rocky"
+
+- name: Check for EPEL7 repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
   when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
+
+- name: Check for EPEL8 repo
+  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state=present
+  become: true
+  when:
+    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "RedHat"
+    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "Rocky"
 
 - name: Symlink Python to Python3 for EL8/Fedora
   file:
@@ -27,6 +49,13 @@
   when: ansible_distribution_major_version|int >= 8 and ansible_python_version|int < 3.6
           and ansible_system == "Linux"
   ignore_errors: true
+
+- name: Install Python3 for Fedora/EL8 and higher clients
+  dnf:
+    name: ['python3']
+    state: present
+  become: true
+  when: ansible_distribution_major_version|int >= 8 and ansible_system == "Linux"
 
 - name: Switch to Python3 by Default (Fedora/EL8)
   command: alternatives --install /usr/bin/python python /usr/bin/python3 1
