@@ -4,8 +4,6 @@
 - name: Check Operating System
   fail:
     msg="You're not running a supported operating system (CentOS, RHEL 7+, Rocky, Fedora or FreeBSD)"
-  when: ((ansible_os_family != "RedHat" or ansible_os_family != "FreeBSD")
-          and (ansible_distribution_major_version|int < 7))
   when:
     - ansible_os_family != "RedHat"
     - ansible_os_family != "Rocky"
@@ -65,7 +63,7 @@
 - name: Install NRPE and Common Plugins
   yum:
     name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
-    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
+           'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
   when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
@@ -73,7 +71,7 @@
 - name: Install NRPE and Common Plugins for Fedora/EL8
   dnf:
     name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
-    'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
+           'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
     state: present
   become: true
   when: ansible_distribution_major_version|int >= 8 and ansible_system == "Linux"
@@ -161,13 +159,13 @@
     path: /etc/rc.conf
     line: nrpe3_enable="YES"
     state: present
-    backup: yes
+    backup: true
   when: ansible_system == "FreeBSD"
 
 - name: Start NRPE service on FreeBSD
   service:
     name: nrpe3
-    enabled: yes
+    enabled: true
     state: restarted
   when: ansible_system == "FreeBSD"
 

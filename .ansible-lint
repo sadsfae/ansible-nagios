@@ -1,0 +1,6 @@
+warn_list:
+  - command-instead-of-module
+  - no-changed-when
+  - var-spacing
+  - ignore-errors
+  - risky-file-permissions
