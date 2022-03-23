@@ -21,8 +21,7 @@
     state=present
   become: true
   when:
-    - ansible_distribution_major_version|int <= 8
-    - ansible_os_family == "RedHat"
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
     - ansible_os_family == "Rocky"
 
 - name: Check for EPEL7 repo
@@ -36,29 +35,23 @@
     state=present
   become: true
   when:
-    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "RedHat"
+    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
     - ansible_distribution_major_version|int <= 8 and ansible_os_family == "Rocky"
 
-- name: Symlink Python to Python3 for EL8/Fedora
-  file:
-    src: /usr/bin/python3
-    dest: /usr/bin/python
-    state: link
-  when: ansible_distribution_major_version|int >= 8 and ansible_python_version|int < 3.6
-          and ansible_system == "Linux"
-  ignore_errors: true
-
-- name: Install Python3 for Fedora/EL8 and higher clients
+- name: Install Python3 for Fedora/EL8 and higher minimal clients
   dnf:
     name: ['python3']
     state: present
   become: true
   when: ansible_distribution_major_version|int >= 8 and ansible_system == "Linux"
 
-- name: Switch to Python3 by Default (Fedora/EL8)
-  command: alternatives --install /usr/bin/python python /usr/bin/python3 1
-  when: ansible_python_version|int < 3.6 and ansible_distribution_major_version|int >= 8
-        and ansible_system == "Linux"
+- name: Symlink Python to Python3 for EL8/Fedora
+  file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
+  when: ansible_distribution_major_version|int >= 8 and ansible_python_version|int < 3.6 and ansible_system == "Linux"
+  ignore_errors: true
 
 - name: Install NRPE and Common Plugins
   yum:
