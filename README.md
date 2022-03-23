@@ -5,6 +5,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fe
 ![Nagios](/image/ansible-nagios.png?raw=true)
 
 [![CI](https://travis-ci.org/sadsfae/ansible-nagios.svg?branch=master)](https://travis-ci.org/sadsfae/ansible-nagios)
+[![GA](https://github.com/sadsfae/ansible-nagios/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/sadsfae/ansible-nagios/actions)
 
 ## What does it do?
    - Automated deployment of Nagios Server on CentOS7 or RHEL7
