@@ -4,3 +4,6 @@ warn_list:
   - var-spacing
   - ignore-errors
   - risky-file-permissions
+
+skip_list:
+  - fqcn-builtins
