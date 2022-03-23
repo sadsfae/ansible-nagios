@@ -40,9 +40,9 @@
 - name: Install nagios packages and common plugins
   yum:
     name: ['nagios', 'nagios-common', 'nagios-plugins-ssh', 'nagios-plugins-tcp', 'nagios-plugins-http',
-    'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap',
-    'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk',
-    'nagios-plugins-dns', 'libsemanage-python', python-requests]
+           'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap',
+           'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk',
+           'nagios-plugins-dns', 'libsemanage-python', python-requests]
     state: present
   become: true
 

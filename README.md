@@ -24,7 +24,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fe
    - Run the playbook.  Read below for more details if needed.
 
 ## Requirements
-   - RHEL7 or CentOS7 for Nagios server only.
+   - RHEL7 or CentOS7 for Nagios server only (for now).
    - RHEL6/7/8, CentOS6/7/8, Fedora or FreeBSD for the NRPE Nagios client
    - If you require SuperMicro server monitoring via IPMI (optional) then do the following
      - Install```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
