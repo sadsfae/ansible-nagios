@@ -10,6 +10,8 @@ galaxy_info:
   - name: EL
     versions:
     - 7
+    - 8
+    - 9
   galaxy_tags:
     - nagios
     - monitoring
