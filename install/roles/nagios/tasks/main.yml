@@ -7,28 +7,59 @@
 
 - name: Check Operating System
   fail:
-    msg="You're not running a supported operating system (CentOS or RHEL 7+)"
-  when: ((ansible_os_family != "RedHat") or (ansible_distribution_major_version|int < 7))
+    msg="You're not running a supported operating system (CentOS7, Rocky8, RHEL7/8)"
+  when:
+    - ansible_os_family != "RedHat" and ansible_distribution_major_version|int < 7
 
-- name: Import EPEL GPG Key
+- name: Import EPEL7 GPG Key
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
+  when: ansible_distribution_major_version|int == 7 and ansible_os_family == "RedHat"
 
-- name: Check for EPEL repo
+- name: Import EPEL8 GPG Key
+  rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+- name: Import EPEL9 GPG Key
+  rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+
+- name: Check for EPEL7 repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
+
+- name: Check for EPEL8 repo
+  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+- name: Check for EPEL9 repo
+  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
 - name: Install HTTPD and OpenSSL
-  yum:
-    name: ['httpd', 'httpd-tools', 'mod_ssl', 'openssl', 'net-snmp-utils', 'freeipmi', 'OpenIPMI-modalias']
+  ansible.builtin.package:
+    name: ['httpd', 'httpd-tools', 'mod_ssl', 'openssl', 'net-snmp-utils', 'freeipmi']
     state: present
   become: true
 
 - name: Install SuperMicro Perl Dependencies
-  yum:
-    name: ['perl-IPC-Run', 'perl-IO-Tty']
+  ansible.builtin.package:
+    name: ['perl-IPC-Run', 'perl-IO-Tty', 'OpenIPMI-modalias']
     state: present
   become: true
   when: supermicro_enable_checks|bool
@@ -38,13 +69,27 @@
   become: true
 
 - name: Install nagios packages and common plugins
-  yum:
+  ansible.builtin.package:
     name: ['nagios', 'nagios-common', 'nagios-plugins-ssh', 'nagios-plugins-tcp', 'nagios-plugins-http',
            'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap',
            'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk',
-           'nagios-plugins-dns', 'libsemanage-python', python-requests]
+           'nagios-plugins-dns']
     state: present
   become: true
+
+- name: Install EL7 specific nagios packages and common plugins
+  ansible.builtin.package:
+    name: ['libsemanage-python', python-requests']
+    state: present
+  become: true
+  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
+
+- name: Install EL8/EL9 specific nagios packages and common plugins
+  ansible.builtin.package:
+    name: ['libsemanage-python3', 'python3-requests']
+    state: present
+  become: true
+  when: ansible_distribution_major_version|int >= 8 and ansible_os_family == "RedHat"
 
 - name: Check nagios Users
   stat: path=/etc/nagios/passwd

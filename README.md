@@ -1,14 +1,14 @@
 ansible-nagios
 ==============
-Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fedora/FreeBSD)
+Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/RHEL/Fedora/FreeBSD)
 
 ![Nagios](/image/ansible-nagios.png?raw=true)
 
 [![GA](https://github.com/sadsfae/ansible-nagios/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/sadsfae/ansible-nagios/actions)
 
 ## What does it do?
-   - Automated deployment of Nagios Server on CentOS7 or RHEL7
-   - Automated deployment of Nagios client on CentOS6/7/8, RHEL6,7,8, Rocky, Fedora and FreeBSD
+   - Automated deployment of Nagios Server on CentOS7, Rocky 8/9 or RHEL 7/8/9
+   - Automated deployment of Nagios client on CentOS6/7/8, RHEL6/7/8/9 or Rocky, Fedora and FreeBSD
      * Generates service checks and monitored hosts from Ansible inventory
      * Generates comprehensive checks for the Nagios server itself
      * Generates comprehensive checks for all hosts/services via NRPE
@@ -24,12 +24,13 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/RHEL/Fe
    - Run the playbook.  Read below for more details if needed.
 
 ## Requirements
-   - RHEL7 or CentOS7 for Nagios server only (for now).
-   - RHEL6/7/8, CentOS6/7/8, Fedora or FreeBSD for the NRPE Nagios client
+   - CentOS 7 or RHEL7/8/9 or Rocky 8/9 for Nagios server only (for now).
+   - RHEL6/7/8/9, CentOS6/7/8/9, Fedora or FreeBSD for the NRPE Nagios client
    - If you require SuperMicro server monitoring via IPMI (optional) then do the following
-     - Install```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7.
+     - Install```perl-IPC-Run``` and ```perl-IO-Tty``` RPMs for RHEL7 for optional IPMI sensor monitoring on SuperMicro.
        - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find them, CentOS7 has them however.
      - Modify ```install/group_vars/all.yml``` to include ```supermicro_enable_checks: true```
+   - Please note I'll likely remove IPMI sensor monitoring support because it's a real pain and not that reliable, SNMP with MiB is better.
 
 ## Notes
    - Sets the ```nagiosadmin``` password to ```changeme```, you'll want to change this.
