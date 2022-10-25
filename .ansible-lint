@@ -4,6 +4,17 @@ warn_list:
   - var-spacing
   - ignore-errors
   - risky-file-permissions
+  - no-free-form
+  - fqcn[action]
+  - name[casing]
+  - name[play]
+  - name[template]
+  - no-free-form
 
 skip_list:
   - fqcn-builtins
+  - fqcn[action]
+  - name[casing]
+  - name[play]
+  - name[template]
+

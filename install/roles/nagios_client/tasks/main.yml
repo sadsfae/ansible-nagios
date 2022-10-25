@@ -14,29 +14,41 @@
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
     state=present
   become: true
-  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
+  when: ansible_distribution_major_version|int == 7 and ansible_os_family == "RedHat"
 
 - name: Import EPEL8 GPG Key
   rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
     state=present
   become: true
   when:
-    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
-    - ansible_os_family == "Rocky"
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+- name: Import EPEL9 GPG Key
+  rpm_key: key=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
 - name: Check for EPEL7 repo
   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state=present
   become: true
-  when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
+  when: ansible_distribution_major_version|int == 7 and ansible_os_family == "RedHat"
 
 - name: Check for EPEL8 repo
-  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     state=present
   become: true
   when:
-    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
-    - ansible_distribution_major_version|int <= 8 and ansible_os_family == "Rocky"
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+- name: Check for EPEL9 repo
+  dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    state=present
+  become: true
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
 - name: Install Python3 for Fedora/EL8 and higher minimal clients
   dnf:
@@ -61,7 +73,7 @@
   become: true
   when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
 
-- name: Install NRPE and Common Plugins for Fedora/EL8
+- name: Install NRPE and Common Plugins for Fedora/EL8/EL9
   dnf:
     name: ['nrpe', 'nagios-plugins-load', 'nagios-plugins-uptime', 'nagios-plugins-swap', 'nagios-plugins-procs',
            'nagios-plugins-users', 'nagios-plugins-disk', 'nagios-plugins-tcp']
