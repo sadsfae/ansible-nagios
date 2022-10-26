@@ -113,10 +113,6 @@
   vars:
     query: "[?mount=='/'].device "
 
-# uncomment this if you want to see root disk during play
-#- debug:
-#    var: host_root_disk
-
 - name: Setup NRPE client configuration
   template:
     src=nrpe.cfg.j2
