@@ -107,6 +107,16 @@
   when: ansible_distribution_major_version|int <= 7 and ansible_os_family == "RedHat"
   ignore_errors: true
 
+- name: Set Fact for Root Disk
+  ansible.builtin.set_fact:
+    host_root_disk: "{{ ansible_mounts|json_query(query)|first }}"
+  vars:
+    query: "[?mount=='/'].device "
+
+# uncomment this if you want to see root disk during play
+#- debug:
+#    var: host_root_disk
+
 - name: Setup NRPE client configuration
   template:
     src=nrpe.cfg.j2
