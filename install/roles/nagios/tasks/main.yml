@@ -161,6 +161,7 @@
     - oobservers.cfg
     - switches.cfg
     - webservers.cfg
+    - webservers_with_ssl.cfg
     - servers.cfg
     - servers_with_mdadm_raid.cfg
     - commands.cfg
@@ -205,6 +206,15 @@
 - name: Make FreeNAS Python status script executable
   file:
     dest: /usr/lib64/nagios/plugins/check_freenas.py
+    mode: a+x
+
+- name: Copy check_ssl_cert Nagios check
+  copy: src=check_ssl_cert dest=/usr/lib64/nagios/plugins/
+  become: true
+
+- name: Make check_ssl_cert Nagios check executable
+  file:
+    dest: /usr/lib64/nagios/plugins/check_ssl_cert
     mode: a+x
 
 - name: Generate the nagios user CGI template

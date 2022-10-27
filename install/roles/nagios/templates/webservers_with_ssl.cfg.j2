@@ -1,42 +1,51 @@
-# generic web services
+# role for checking SSL certificate validity
 define hostgroup {
-	hostgroup_name webservers
-        alias Web Servers
+	hostgroup_name webservers_with_ssl
+        alias SSL Web Servers
 }
 
-{% for host in groups['webservers'] %}
+{% for host in groups['webservers_with_ssl'] %}
 {% if hostvars[host].ansible_os_family == "RedHat" %}
 
 define host {
-	use                     linux-server
-	host_name               {{ host }}
-	alias                   {{ host }}
-	address                 {{ hostvars[host].ansible_default_ipv4.address }}
-	hostgroups              webservers
+    use                     linux-server
+    host_name               {{ host }}
+    alias                   {{ host }}
+    address                 {{ hostvars[host].ansible_default_ipv4.address }}
+    hostgroups              webservers_with_ssl
 }
 
 define service {
     use                         local-service
     host_name                   {{ host }}
-    hostgroup_name              webservers
+    hostgroup_name              webservers_with_ssl
     service_description         HTTP
     check_command               check_http
     notifications_enabled       1
 }
 
 define service {
-	use                     local-service
-	host_name               {{ host }}
-    hostgroup_name          webservers
-	service_description     SSH
-	check_command		    check_ssh
-	notifications_enabled   1
+    use                         local-service
+    host_name                   {{ host }}
+    hostgroup_name              webservers_with_ssl
+    service_description         SSL Certificate
+    check_command               check_ssl_cert
+    notifications_enabled       1
+}
+
+define service {
+    use                     local-service
+    host_name               {{ host }}
+    hostgroup_name          webservers_with_ssl
+    service_description     SSH
+    check_command		    check_ssh
+    notifications_enabled   1
 }
 
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     PING
     check_command           check_ping!200.0,20%!600.0,60%
     notifications_enabled   1
@@ -44,7 +53,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     CPU Load
     check_command           check_nrpe!check_load
     notifications_enabled   1
@@ -53,7 +62,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Total Processes
     check_command           check_nrpe!check_total_procs
     notifications_enabled   1
@@ -62,7 +71,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Zombie Processes
     check_command           check_nrpe!check_zombie_procs
     notifications_enabled   1
@@ -71,7 +80,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Current Users
     check_command           check_nrpe!check_users
     notifications_enabled   1
@@ -80,7 +89,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Disk Check
     check_command           check_nrpe!check_root
     notifications_enabled   1
@@ -89,7 +98,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Uptime
     check_command           check_nrpe!check_uptime
     notifications_enabled   1
@@ -104,22 +113,31 @@ define host {
     host_name               {{ host }}
     alias                   {{ host }}
     address                 {{ hostvars[host].ansible_default_ipv4.address }}
-    hostgroups              webservers
+    hostgroups              webservers_with_ssl
 }
 
 define service {
     use                     local-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     HTTP
     check_command           check_http
     notifications_enabled   1
 }
 
 define service {
+    use                         local-service
+    host_name                   {{ host }}
+    hostgroup_name              webservers_with_ssl
+    service_description         SSL Certificate
+    check_command               checl_ssl_cert
+    notifications_enabled       1
+}
+
+define service {
 	use			            local-service
 	host_name               {{ host }}
-    hostgroup_name		    webservers
+    hostgroup_name		    webservers_with_ssl
 	service_description	    SSH
 	check_command		    check_ssh
 	notifications_enabled   1
@@ -128,7 +146,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     PING
     check_command           check_ping!200.0,20%!600.0,60%
     notifications_enabled   1
@@ -136,7 +154,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     CPU Load
     check_command           check_nrpe!bsd_check_load
     notifications_enabled   1
@@ -146,7 +164,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Total Processes
     check_command           check_nrpe!bsd_check_procs
     notifications_enabled   1
@@ -155,7 +173,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Check Swap
     check_command           check_nrpe!bsd_check_swap
     notifications_enabled   1
@@ -164,7 +182,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Current Users
     check_command           check_nrpe!bsd_check_users
     notifications_enabled   1
@@ -173,7 +191,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Total Processes
     check_command           check_nrpe!check_swap
     notifications_enabled   1
@@ -182,7 +200,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Disk Check
     check_command           check_nrpe!bsd_check_disk
     notifications_enabled   1
@@ -191,7 +209,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Uptime
     check_command           check_nrpe!bsd_check_uptime
     notifications_enabled   1
@@ -200,7 +218,7 @@ define service {
 define service {
     use                     generic-service
     host_name               {{ host }}
-    hostgroup_name          webservers
+    hostgroup_name          webservers_with_ssl
     service_description     Zombie Processes
     check_command           check_nrpe!bsd_check_zombie_procs
     notifications_enabled   1

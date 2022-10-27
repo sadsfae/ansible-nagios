@@ -74,6 +74,22 @@ define command{
         command_line    $USER1$/check_http -a {{oobserver_user}}:{{oobserver_pass}} -I $HOSTADDRESS$ $ARG1$
 }
 {% endif %}
+
+# SSL certificate checks
+{% if ssl_check_sct_self_signed == false %}
+define command{
+command_name check_ssl_cert
+command_line $USER1$/check_ssl_cert --ignore-sct --selfsigned -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
+}
+{% endif %}
+
+{% if ssl_check_sct_self_signed == true %}
+define command{
+command_name check_ssl_cert
+command_line $USER1$/check_ssl_cert -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
+}
+{% endif %}
+
 # 'check_idrac_ps' command definition for idracs
 define command{
         command_name    check_idrac_ps
