@@ -16,6 +16,9 @@ host-01
 # inherits servers checks, includes http
 [webservers]
 
+# also checks https ssl certificates, inherits server checks, includes http service check
+[webservers_with_ssl]
+
 # inherits server checks, includes DNS check
 [dns]
 

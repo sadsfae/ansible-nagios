@@ -60,9 +60,20 @@ kibana_password: admin
 oobserver_use_auth: false
 oobserver_user: admin
 oobserver_pass: admin
+### HTTP options ###
 # follow 301 / redirects with check_http by default
 # otherwise set this to false.
 check_http_301_ok: true
+# check_ssl_cert options for webservers_ssl
+#
+# check server certificate transparency (SCT)
+# and disallow self-signed certificates.
+# default is false
+ssl_check_sct_self_signed: false
+# days to warn for certificate expiration
+ssl_cert_exp_warn_days: 60
+# days to set critical alert for expiration
+ssl_cert_exp_crit_days: 30
 
 ### DNS Service Options
 # dns domain you want service checks to query

@@ -46,6 +46,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
      - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers plus elasticsearch and Kibana)*
      - Elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
      - Webservers *(same as servers plus 80/TCP for webserver)*
+     - Webservers with SSL certificate checking *(same as webservers plus checks SSL certificate validity/expiration)*
      - DNS Servers *(same as servers plus UDP/53 for DNS)*
      - DNS Servers with MDADM RAID (same as above)
      - DNS Service Only (DNS and ICMP check)
