@@ -36,6 +36,10 @@ critical_proc: 1000
 # threshold for # of logged in users
 warning_users: 15
 critical_users: 30
+# NRPE version, default is -2 for version 2
+# this is used if you get compatibility issues with nrpe
+# valid options -2, or blank
+nrpe_version: -2
 
 ### services ports ###
 # jenkins
