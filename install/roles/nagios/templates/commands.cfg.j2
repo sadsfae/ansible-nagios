@@ -18,7 +18,7 @@
 
 define command {
 	command_name                   check_nrpe
-	command_line                   /usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
+	command_line                   /usr/lib64/nagios/plugins/check_nrpe {{ nrpe_version if nrpe_version else 'Continue' }} -H $HOSTADDRESS$ -c $ARG1$
 }
 
 # check_uptime command definition
