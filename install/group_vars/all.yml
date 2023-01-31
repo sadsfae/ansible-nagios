@@ -27,6 +27,10 @@ admin_email_01: nagios@localhost
 # set to false if you don't want to monitor swap
 # on your nagios server
 nagios_host_monitor_swap: true
+### webhook alert settings
+# set to true to enable alerting via a remote webhook.
+enable_webhook_alerts: false
+webhook_alerts_url: https://chat.example.com/v1/spaces/AAAABBBBCCCC
 
 ### NRPE variables ###
 nrpe_tcp_port: 5666
