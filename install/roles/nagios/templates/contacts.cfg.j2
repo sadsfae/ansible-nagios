@@ -14,7 +14,7 @@ define contact{
 define contactgroup{
         contactgroup_name       admins
         alias                   Nagios Administrators
-        members                 {{admin_name_01}},{{ nagbothook if enable_webhook_alerts else 'Continue' }}
+        members                 {{admin_name_01}}{{',nagbothook' if enable_webhook_alerts}}
         }
 
 ### NAGIOS IRC BOT TEMPLATE
