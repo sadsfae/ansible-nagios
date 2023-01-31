@@ -15,6 +15,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
      * Generates most of the other configs based on jinja2 templates
      * Wraps Nagios in SSL via Apache
      * Sets up proper firewall rules (firewalld or iptables-services)
+     * Support sending alerts via email and outgoing webhooks.
      * This is also available via [Ansible Galaxy](https://galaxy.ansible.com/sadsfae/ansible-nagios/)
 
 ## How do I use it?
