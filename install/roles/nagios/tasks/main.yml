@@ -73,7 +73,7 @@
     name: ['nagios', 'nagios-common', 'nagios-plugins-ssh', 'nagios-plugins-tcp', 'nagios-plugins-http',
            'nagios-plugins-load', 'nagios-plugins-nrpe', 'nagios-plugins-uptime', 'nagios-plugins-swap',
            'nagios-plugins-ping', 'nagios-plugins-procs', 'nagios-plugins-users', 'nagios-plugins-disk',
-           'nagios-plugins-dns']
+           'nagios-plugins-dns', 'bc']
     state: present
   become: true
 
