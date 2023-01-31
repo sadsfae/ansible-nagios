@@ -2,7 +2,6 @@
 # HEADER: by puppet.  While it can still be managed manually, it
 # HEADER: is definitely not recommended.
 
-## EDIT add IRC bot check
 # 'notify-by-ircbot' command definition
 #define command{
 #        command_name    notify-by-ircbot
@@ -14,6 +13,19 @@
 #	command_name	host-notify-by-ircbot
 #	command_line	/usr/bin/printf "%b" "#openstack-lab NAGIOS: $NOTIFICATIONTYPE$ - $HOSTALIAS$ is $HOSTSTATE$: $HOSTOUTPUT$ ($$(hostname -s))" | nc -w 1 10.16.17.75 5050
 #}
+
+####### WEBHOOK ALERTS
+
+define command{
+        command_name    notify-by-webhook
+        command_line    /usr/bin/curl -k -X POST -H "Content-Type: application/json" --data '{"text":"NAGIOS: $NOTIFICATIONTYPE$ - $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$: $SERVICEOUTPUT$ "}' {{ webhook_alerts_url }}
+}
+
+define command{
+        command_name    host-notify-by-webhook
+        command_line    /usr/bin/curl -k -X POST -H "Content-Type: application/json" --data '{"text":"NAGIOS: $NOTIFICATIONTYPE$ - $HOSTALIAS$ is $HOSTSTATE$: $HOSTOUTPUT$ "}' {{ webhook_alerts_url }}
+}
+
 #### Define NRPE command here, you need to have this for external host checks #####
 
 define command {
@@ -26,6 +38,21 @@ define command{
         command_name    check_uptime
         command_line    /usr/lib64/nagios/plugins/check_uptime
 }
+
+# SSL certificate checks
+{% if ssl_check_sct_self_signed == false %}
+define command{
+command_name check_ssl_cert
+command_line $USER1$/check_ssl_cert --ignore-sct --selfsigned -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
+}
+{% endif %}
+
+{% if ssl_check_sct_self_signed == true %}
+define command{
+command_name check_ssl_cert
+command_line $USER1$/check_ssl_cert -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
+}
+{% endif %}
 
 {% if check_http_301_ok == true %}
 # 'check_http' command definition for elk kibana
@@ -74,22 +101,6 @@ define command{
         command_line    $USER1$/check_http -a {{oobserver_user}}:{{oobserver_pass}} -I $HOSTADDRESS$ $ARG1$
 }
 {% endif %}
-
-# SSL certificate checks
-{% if ssl_check_sct_self_signed == false %}
-define command{
-command_name check_ssl_cert
-command_line $USER1$/check_ssl_cert --ignore-sct --selfsigned -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
-}
-{% endif %}
-
-{% if ssl_check_sct_self_signed == true %}
-define command{
-command_name check_ssl_cert
-command_line $USER1$/check_ssl_cert -H '$HOSTADDRESS$' -c {{ssl_cert_exp_crit_days}} -w {{ssl_cert_exp_warn_days}}
-}
-{% endif %}
-
 # 'check_idrac_ps' command definition for idracs
 define command{
         command_name    check_idrac_ps
