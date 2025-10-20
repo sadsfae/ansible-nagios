@@ -96,7 +96,7 @@ freenas_use_ssl: false
 freenas_user: root
 freenas_pass: password
 
-### Quads Server Options
+### QUADS Server Options
 # Time threshold (in hours) for active & unvalidated assignments
 quads_validate_check_threshold: 2
 
