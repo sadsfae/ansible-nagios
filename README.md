@@ -61,7 +61,7 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
      - SuperMicro server checks via the IPMI interface.
        - CPU, DISK, PS, TEMP, MEM: or anything supported via ```freeipmi``` sensors.
        - *Note: This is **not** the best way to monitor things, SNMP checks are WIP once we purchase licenses for them for our systems
-     - [QUADS|https://quads.dev/about-quads] Servers *(same as server plus alerting on active assignments that are not validated after a time threshold)*
+     - [QUADS](https://quads.dev/about-quads) Servers *(same as server plus alerting on active assignments that are not validated after a time threshold)*
    - ```contacts.cfg``` notification settings are in ```install/group_vars/all.yml``` and templated for easy modification.
 
 ## Nagios Server Instructions
