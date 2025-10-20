@@ -1,0 +1,104 @@
+# generic QUADS quads_servers
+define hostgroup {
+	hostgroup_name quads_servers
+        alias QUADS Servers
+}
+
+{% for host in groups['quads_servers'] %}
+
+define host {
+	use                     linux-server
+	host_name               {{ host }}
+	alias                   {{ host }}
+	address                 {{ hostvars[host].ansible_default_ipv4.address }}
+	hostgroups              quads_servers
+}
+
+define service {
+	use                     local-service
+	host_name               {{ host }}
+    hostgroup_name		    quads_servers
+	service_description	    SSH
+	check_command		    check_ssh
+	notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     PING
+    check_command           check_ping!200.0,20%!600.0,60%
+    notifications_enabled   1
+}
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     CPU Load
+    check_command           check_nrpe!check_load
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Total Processes
+    check_command           check_nrpe!check_total_procs
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Zombie Processes
+    check_command           check_nrpe!check_zombie_procs
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Current Users
+    check_command           check_nrpe!check_users
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Disk Check
+    check_command           check_nrpe!check_root
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Check Swap
+    check_command           check_nrpe!check_swap
+    notifications_enabled   1
+}
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          quads_servers
+    service_description     Uptime
+    check_command           check_nrpe!check_uptime
+    notifications_enabled   1
+}
+define service {
+	use				       local-service
+	hostgroup_name		   quads_servers
+	service_description	   Unvalidated Assignments
+	check_command		   quads_check_assignment
+	notifications_enabled  1
+
+}
+
+{% endfor %}

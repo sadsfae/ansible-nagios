@@ -89,3 +89,7 @@ host-01
 
 # Supermicro 1028r and 1029p models
 [supermicro_1028r]
+
+# QUADS Servers inherits server checks, includes quads_check_assignment check.
+# See: install/group_vars/all.yml for changing the default(=2hrs) time threshold.
+[quads_servers]
