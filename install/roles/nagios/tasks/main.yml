@@ -177,6 +177,7 @@
     - freenas.cfg
     - devices.cfg
     - dns_only.cfg
+    - quads_servers.cfg
   register: nagios_needs_restart
   become: true
 
@@ -206,6 +207,19 @@
 - name: Make FreeNAS Python status script executable
   file:
     dest: /usr/lib64/nagios/plugins/check_freenas.py
+    mode: a+x
+
+- name: Generate templated quads-check-assignments script
+  template: src={{ item + ".j2" }}
+            dest=/usr/lib64/nagios/plugins/quads_check_assignment.py
+            force=yes
+  with_items:
+    - quads_check_assignment.py
+  become: true
+
+- name: Make quads-check-assignments script status script executable
+  file:
+    dest: /usr/lib64/nagios/plugins/quads_check_assignment.py
     mode: a+x
 
 - name: Copy check_ssl_cert Nagios check

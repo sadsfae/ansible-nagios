@@ -267,6 +267,12 @@ define command{
         command_line    /usr/local/libexec/nagios/bsd_check_uptime
 }
 
+# quads_check_assignment command definition
+define command{
+        command_name    quads_check_assignment
+        command_line    $USER1$/quads_check_assignment.py -H $HOSTADDRESS$ -c {{quads_validate_check_threshold}}
+}
+
 
 ### These are OpenStack examples, I am leaving them here for reference
 ### You can define more custom commands below for NRPE ###
