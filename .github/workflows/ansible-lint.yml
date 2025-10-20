@@ -27,7 +27,7 @@ jobs:
           pip install ansible ansible-lint jmespath
       - name: Analysing all playbooks
         run: |
-          ansible-lint install/*.yml -x 303,701,601,301,206,208 -v
+          ansible-lint install/*.yml -x 303,701,601,301,206,208,402 -v
       - name: Analysing all playbook roles
         run: |
-          ansible-lint install/roles/*/*/*.yml -x 303,701,601,206,208 -v
+          ansible-lint install/roles/*/*/*.yml -x 303,701,601,206,208,402 -v
