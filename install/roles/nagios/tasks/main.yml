@@ -178,6 +178,7 @@
     - devices.cfg
     - dns_only.cfg
     - quads_servers.cfg
+    - quads_servers_with_ssl.cfg
   register: nagios_needs_restart
   become: true
 
