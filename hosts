@@ -93,3 +93,6 @@ host-01
 # QUADS Servers inherits server checks, includes quads_check_assignment check.
 # See: install/group_vars/all.yml for changing the default(=2hrs) time threshold.
 [quads_servers]
+
+# Inherits QUADS server checks, includes ssl and http check.
+[quads_servers_with_ssl]
