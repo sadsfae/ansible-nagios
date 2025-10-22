@@ -210,18 +210,9 @@
     dest: /usr/lib64/nagios/plugins/check_freenas.py
     mode: a+x
 
-- name: Generate templated quads-check-assignments script
-  template: src={{ item + ".j2" }}
-            dest=/usr/lib64/nagios/plugins/quads_check_assignment.py
-            force=yes
-  with_items:
-    - quads_check_assignment.py
+- name: Configure quads-check-assignments
+  copy: src=quads_check_assignment.py  dest={{nagios_plugin_path}}/ mode=0755
   become: true
-
-- name: Make quads-check-assignments script status script executable
-  file:
-    dest: /usr/lib64/nagios/plugins/quads_check_assignment.py
-    mode: a+x
 
 - name: Copy check_ssl_cert Nagios check
   copy: src=check_ssl_cert dest=/usr/lib64/nagios/plugins/
