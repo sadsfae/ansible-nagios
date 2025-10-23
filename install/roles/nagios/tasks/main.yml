@@ -211,7 +211,10 @@
     mode: a+x
 
 - name: Configure quads-check-assignments
-  copy: src=quads_check_assignment.py  dest={{nagios_plugin_path}}/ mode=0755
+  copy:
+    src: quads_check_assignment.py
+    dest: "{{nagios_plugin_path}}/"
+    mode: 0755
   become: true
 
 - name: Copy check_ssl_cert Nagios check
