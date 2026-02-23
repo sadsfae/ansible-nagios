@@ -944,6 +944,7 @@ class PARSER:
         if self.order is None:
             self.snmp_command = "snmpwalk"  # use walk when check group or all
             snmp_data = self.get_snmp(oids=self.hardware[0])
+            power_state = self.get_snmp(oids="systemPowerState")[0].split()[1]
             for data in snmp_data:
                 if re.search(self.hardware[3].split("|")[0], data, re.IGNORECASE):
                     hw_quantity += 1
@@ -995,6 +996,9 @@ class PARSER:
         # --re-format output to suit hw type. Power is the most messed part!
         output = []
         exit_code = [0, "OK"]
+        if power_state == "off":
+            output.append("Powered off.  Assuming OK.")
+            return output, exit_code
         if self.hardware[2] == "PDisk":
             value_on_alert = [
                 3,
