@@ -13,24 +13,28 @@
   ansible.builtin.set_fact:
     nagios_pkg: nagios
     nagios_dir: /etc/nagios
+    nagios_log_dir: /var/log/nagios
     plugin_dir: /usr/lib64/nagios/plugins
     web_service: httpd
     web_user: apache
     nagios_service: nagios
     passwd_file: /etc/nagios/passwd
     httpd_conf: /etc/httpd/conf/httpd.conf
+    command_file: /var/spool/nagios/cmd/nagios.cmd
   when: ansible_os_family == "RedHat"
 
 - name: Set Debian specific variables
   ansible.builtin.set_fact:
     nagios_pkg: nagios4
     nagios_dir: /etc/nagios4
+    nagios_log_dir: /var/log/nagios4
     plugin_dir: /usr/lib/nagios/plugins
     web_service: apache2
     web_user: www-data
     nagios_service: nagios4
     passwd_file: /etc/nagios4/htpasswd.users
     httpd_conf: /etc/apache2/ports.conf
+    command_file: /var/lib/nagios4/rw/nagios.cmd
   when: ansible_os_family == "Debian"
 # -----------------------------------
 
@@ -104,20 +108,21 @@
   become: true
   when: ansible_os_family == "RedHat"
 
-- name: Setup nagios SSL HTTPD vhost (Debian)
+- name: Setup nagios Apache config (Debian)
   ansible.builtin.template:
     src: nagios.conf.j2
-    dest: /etc/apache2/conf-available/nagios-ssl.conf
+    dest: /etc/apache2/conf-available/nagios4-cgi.conf
   become: true
   when: ansible_os_family == "Debian"
 
-- name: Enable Apache modules and config (Debian)
+- name: Enable Apache modules, SSL site, and nagios config (Debian)
   ansible.builtin.command: "{{ item }}"
   loop:
     - a2enmod ssl
     - a2enmod cgi
     - a2enmod rewrite
-    - a2enconf nagios-ssl
+    - a2ensite default-ssl
+    - a2enconf nagios4-cgi
   become: true
   when: ansible_os_family == "Debian"
   register: apache_modules
@@ -168,6 +173,7 @@
       - monitoring-plugins-common
       - monitoring-plugins-standard
       - monitoring-plugins-basic
+      - nagios-nrpe-plugin
       - bc
       - python3-requests
     state: present
@@ -230,8 +236,8 @@
   become: true
 
 - name: Configure nagios main configuration
-  ansible.builtin.copy:
-    src: nagios.cfg
+  ansible.builtin.template:
+    src: nagios.cfg.j2
     dest: "{{ nagios_dir }}/nagios.cfg"
   become: true
 
@@ -376,7 +382,7 @@
 
 - name: Create nagios socket tmp files (rw)
   ansible.builtin.file:
-    path: /var/log/nagios/rw
+    path: "{{ nagios_log_dir }}/rw"
     state: directory
     owner: nagios
     group: "{{ web_user }}" # Debian requires www-data here
@@ -385,7 +391,7 @@
 
 - name: Create nagios results directory
   ansible.builtin.file:
-    path: /var/log/nagios/spool/checkresults
+    path: "{{ nagios_log_dir }}/spool/checkresults"
     state: directory
     owner: nagios
     group: nagios
@@ -396,7 +402,7 @@
   ansible.builtin.lineinfile:
     dest: /usr/lib/systemd/system/nagios.service
     regexp: "^ExecStopPost="
-    line: "ExecStopPost=/usr/bin/rm -f /var/spool/nagios/cmd/nagios.cmd /var/log/nagios/rw/nagios.qh"
+    line: "ExecStopPost=/usr/bin/rm -f {{ command_file }} {{ nagios_log_dir }}/rw/nagios.qh"
   register: systemd_nagios_changed
   become: true
   when: ansible_os_family == "RedHat"

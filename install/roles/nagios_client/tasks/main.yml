@@ -108,13 +108,14 @@
   become: true
   when:
     - ansible_distribution_major_version | int >= 8
-    - ansible_system == "Linux"
+    - ansible_os_family == "RedHat"
 
 - name: Install NRPE and Common Plugins (Debian/Ubuntu)
   ansible.builtin.apt:
     name:
       - nagios-nrpe-server
       - monitoring-plugins
+      - nagios-plugins-contrib
     state: present
     update_cache: true
   become: true
