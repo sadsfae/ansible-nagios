@@ -8,15 +8,20 @@
 ###
 RewriteEngine On
 # redirect HTTP to HTTPS
+{% if ansible_os_family == "Debian" %}
+RewriteRule ^/$ https://%{HTTP_HOST}/nagios4/$1 [R=301,L]
+RewriteRule ^(nagios4/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+{% else %}
 RewriteRule ^/$ https://%{HTTP_HOST}/nagios/$1 [R=301,L]
 RewriteRule ^(nagios/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+{% endif %}
 
 {% if ansible_os_family == "RedHat" %}
 ScriptAlias /nagios/cgi-bin/ "/usr/lib64/nagios/cgi-bin/"
 
 <Directory "/usr/lib64/nagios/cgi-bin/">
 {% elif ansible_os_family == "Debian" %}
-ScriptAlias /nagios/cgi-bin/ "/usr/lib/cgi-bin/nagios4/"
+ScriptAlias /nagios4/cgi-bin/ /usr/lib/cgi-bin/nagios4/
 
 <Directory "/usr/lib/cgi-bin/nagios4/">
 {% endif %}
@@ -30,11 +35,8 @@ ScriptAlias /nagios/cgi-bin/ "/usr/lib/cgi-bin/nagios4/"
 
    <IfModule mod_authz_core.c>
       # Apache 2.4
-      <RequireAll>
-         Require all granted
-         # Require local
-         Require valid-user
-      </RequireAll>
+      # Require local
+      Require valid-user
    </IfModule>
    <IfModule !mod_authz_core.c>
       # Apache 2.2
@@ -53,7 +55,8 @@ Alias /nagios "/usr/share/nagios/html"
 
 <Directory "/usr/share/nagios/html">
 {% elif ansible_os_family == "Debian" %}
-Alias /nagios "/usr/share/nagios4/htdocs"
+Alias /nagios4/stylesheets /etc/nagios4/stylesheets
+Alias /nagios4 /usr/share/nagios4/htdocs
 
 <Directory "/usr/share/nagios4/htdocs">
 {% endif %}
@@ -67,11 +70,8 @@ Alias /nagios "/usr/share/nagios4/htdocs"
 
    <IfModule mod_authz_core.c>
       # Apache 2.4
-      <RequireAll>
-         Require all granted
-         # Require local
-         Require valid-user
-      </RequireAll>
+      # Require local
+      Require valid-user
    </IfModule>
    <IfModule !mod_authz_core.c>
       # Apache 2.2
