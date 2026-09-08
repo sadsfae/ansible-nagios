@@ -8,23 +8,12 @@
 ###
 RewriteEngine On
 # redirect HTTP to HTTPS
-{% if ansible_os_family == "Debian" %}
-RewriteRule ^/$ https://%{HTTP_HOST}/nagios4/$1 [R=301,L]
-RewriteRule ^(nagios4/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
-{% else %}
-RewriteRule ^/$ https://%{HTTP_HOST}/nagios/$1 [R=301,L]
-RewriteRule ^(nagios/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
-{% endif %}
+RewriteRule ^/$ https://%{HTTP_HOST}/{{ nagios_web_path }}/$1 [R=301,L]
+RewriteRule ^({{ nagios_web_path }}/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
 
-{% if ansible_os_family == "RedHat" %}
-ScriptAlias /nagios/cgi-bin/ "/usr/lib64/nagios/cgi-bin/"
+ScriptAlias /{{ nagios_web_path }}/cgi-bin/ "{{ nagios_cgi_dir }}"
 
-<Directory "/usr/lib64/nagios/cgi-bin/">
-{% elif ansible_os_family == "Debian" %}
-ScriptAlias /nagios4/cgi-bin/ /usr/lib/cgi-bin/nagios4/
-
-<Directory "/usr/lib/cgi-bin/nagios4/">
-{% endif %}
+<Directory "{{ nagios_cgi_dir }}">
    SSLRequireSSL
    Options ExecCGI
    AllowOverride None
@@ -50,16 +39,12 @@ ScriptAlias /nagios4/cgi-bin/ /usr/lib/cgi-bin/nagios4/
 </Directory>
 
 # use an alias for nagios
-{% if ansible_os_family == "RedHat" %}
-Alias /nagios "/usr/share/nagios/html"
-
-<Directory "/usr/share/nagios/html">
-{% elif ansible_os_family == "Debian" %}
-Alias /nagios4/stylesheets /etc/nagios4/stylesheets
-Alias /nagios4 /usr/share/nagios4/htdocs
-
-<Directory "/usr/share/nagios4/htdocs">
+{% if ansible_os_family == "Debian" %}
+Alias /{{ nagios_web_path }}/stylesheets /etc/nagios4/stylesheets
 {% endif %}
+Alias /{{ nagios_web_path }} "{{ nagios_html_dir }}"
+
+<Directory "{{ nagios_html_dir }}">
    SSLRequireSSL
    Options None
    AllowOverride None

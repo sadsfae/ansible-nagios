@@ -21,6 +21,10 @@
     passwd_file: /etc/nagios/passwd
     httpd_conf: /etc/httpd/conf/httpd.conf
     command_file: /var/spool/nagios/cmd/nagios.cmd
+    resource_file: /etc/nagios/private/resource.cfg
+    nagios_web_path: nagios
+    nagios_cgi_dir: /usr/lib64/nagios/cgi-bin/
+    nagios_html_dir: /usr/share/nagios/html
   when: ansible_os_family == "RedHat"
 
 - name: Set Debian specific variables
@@ -35,6 +39,10 @@
     passwd_file: /etc/nagios4/htpasswd.users
     httpd_conf: /etc/apache2/ports.conf
     command_file: /var/lib/nagios4/rw/nagios.cmd
+    resource_file: /etc/nagios4/resource.cfg
+    nagios_web_path: nagios4
+    nagios_cgi_dir: /usr/lib/cgi-bin/nagios4/
+    nagios_html_dir: /usr/share/nagios4/htdocs
   when: ansible_os_family == "Debian"
 # -----------------------------------
 
