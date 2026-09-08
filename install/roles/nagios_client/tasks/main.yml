@@ -7,6 +7,30 @@
   when:
     - ansible_os_family not in ["RedHat", "Rocky", "Debian", "FreeBSD"]
 
+- name: Set Debian specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nagios/nrpe.pid
+    nrpe_user: nagios
+    nrpe_group: nagios
+    nrpe_plugin_dir: /usr/lib/nagios/plugins
+  when: ansible_os_family == "Debian"
+
+- name: Set RedHat specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nrpe/nrpe.pid
+    nrpe_user: nrpe
+    nrpe_group: nrpe
+    nrpe_plugin_dir: /usr/lib64/nagios/plugins
+  when: ansible_os_family in ["RedHat", "Rocky"]
+
+- name: Set FreeBSD specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nrpe/nrpe.pid
+    nrpe_user: nrpe
+    nrpe_group: nrpe
+    nrpe_plugin_dir: /usr/local/libexec/nagios
+  when: ansible_os_family == "FreeBSD"
+
 - name: Install gnupg2 (Legacy EL7)
   ansible.builtin.package:
     name: gnupg2

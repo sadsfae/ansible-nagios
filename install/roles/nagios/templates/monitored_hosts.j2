@@ -1,0 +1,148 @@
+{#
+  Shared host/service renderer for NRPE-monitored groups.
+
+  render_group(group_name, alias, extra_services=[], filemon=false)
+    group_name     inventory group to iterate (groups[group_name])
+    alias          hostgroup alias
+    extra_services list of {description, check_command, use} dicts appended
+                   per host (use defaults to generic-service)
+    filemon        when true, append file age monitoring services
+
+  Command names are sourced from the shared nrpe_check_commands map
+  (install/group_vars/all.yml), selected per host by OS.
+#}
+{% macro render_group(group_name, alias, extra_services=[], filemon=false) %}
+define hostgroup {
+    hostgroup_name {{ group_name }}
+    alias {{ alias }}
+}
+
+{% for host in groups[group_name] %}
+{% set cmd = nrpe_check_commands.freebsd if hostvars[host].ansible_distribution == "FreeBSD" else nrpe_check_commands.default %}
+define host {
+    use                     linux-server
+    host_name               {{ host }}
+    alias                   {{ host }}
+    address                 {{ hostvars[host].ansible_default_ipv4.address }}
+    hostgroups              {{ group_name }}
+}
+
+define service {
+    use                     local-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     SSH
+    check_command           check_ssh
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     PING
+    check_command           check_ping!200.0,20%!600.0,60%
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     CPU Load
+    check_command           check_nrpe!{{ cmd.load }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Total Processes
+    check_command           check_nrpe!{{ cmd.procs }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Zombie Processes
+    check_command           check_nrpe!{{ cmd.zombie }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Current Users
+    check_command           check_nrpe!{{ cmd.users }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Disk Check
+    check_command           check_nrpe!{{ cmd.disk }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Check Swap
+    check_command           check_nrpe!{{ cmd.swap }}
+    notifications_enabled   1
+}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     Uptime
+    check_command           check_nrpe!{{ cmd.uptime }}
+    notifications_enabled   1
+}
+{% for svc in extra_services %}
+
+define service {
+    use                     {{ svc.use | default('generic-service') }}
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     {{ svc.description }}
+    check_command           {{ svc.check_command }}
+    notifications_enabled   1
+}
+{% endfor %}
+{% if filemon %}
+{% if host in filemon_hosts_config %}
+{% for file in filemon_hosts_config[host] %}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     {{ file.description | default('File Age: ' ~ file.path) }}
+    check_command           check_nrpe!{{ cmd.file_age }}_{{ loop.index0 }}
+    notifications_enabled   1
+}
+{% endfor %}
+{% else %}
+
+define service {
+    use                     generic-service
+    host_name               {{ host }}
+    hostgroup_name          {{ group_name }}
+    service_description     File Age Check
+    check_command           check_nrpe!{{ cmd.file_age }}
+    notifications_enabled   1
+}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% endmacro %}
