@@ -22,11 +22,7 @@ log_facility=daemon
 # number.  The file is only written if the NRPE daemon is started by the root
 # user and is running in standalone mode.
 
-{% if ansible_os_family == 'Debian' %}
-pid_file=/var/run/nagios/nrpe.pid
-{% else %}
-pid_file=/var/run/nrpe/nrpe.pid
-{% endif %}
+pid_file={{ nrpe_pid_file }}
 
 
 # PORT NUMBER
@@ -50,13 +46,8 @@ server_port={{nrpe_tcp_port}}
 #
 # NOTE: This option is ignored if NRPE is running under either inetd or xinetd
 
-{% if ansible_os_family == 'Debian' %}
-nrpe_user=nagios
-nrpe_group=nagios
-{% else %}
-nrpe_user=nrpe
-nrpe_group=nrpe
-{% endif %}
+nrpe_user={{ nrpe_user }}
+nrpe_group={{ nrpe_group }}
 
 # ALLOWED HOST ADDRESSES
 # This is an optional comma-delimited list of IP address or hostnames
@@ -199,65 +190,27 @@ connection_timeout=300
 
 # The following examples use hardcoded command arguments...
 
-{% if ansible_distribution == "FreeBSD" %}
+{% set nrpe_cmd = nrpe_check_commands.freebsd if ansible_distribution == "FreeBSD" else nrpe_check_commands.default %}
+{% set root_disk = ansible_mounts[0]['device'] if ansible_distribution == "FreeBSD" else host_root_disk[0] %}
 
-command[bsd_check_users]=/usr/local/libexec/nagios/check_users -w {{ warning_users }} -c {{ critical_users }}
-command[bsd_check_load]=/usr/local/libexec/nagios/check_load -w 15,10,5 -c 30,25,20
-command[bsd_check_disk]=/usr/local/libexec/nagios/check_disk -w 20% -c 10% -p {{ ansible_mounts[0]['device'] }}
-command[bsd_check_procs]=/usr/local/libexec/nagios/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
-command[check_tcp_es]=/usr/local/libexec/nagios/check_tcp -H localhost -p {{ elasticsearch_port }}
-command[check_jenkins]=/usr/local/libexec/nagios/check_tcp -H localhost -p {{ jenkins_port }}
-command[bsd_check_swap]=/usr/local/libexec/nagios/check_swap -w 60 -c 10
-command[bsd_check_uptime]=/usr/local/libexec/nagios/bsd_check_uptime
-command[bsd_check_zombie_procs]=/usr/local/libexec/nagios/check_procs -w 5 -c 10 -s Z
+command[{{ nrpe_cmd.users }}]={{ nrpe_plugin_dir }}/check_users -w {{ warning_users }} -c {{ critical_users }}
+command[{{ nrpe_cmd.load }}]={{ nrpe_plugin_dir }}/check_load -w 15,10,5 -c 30,25,20
+command[{{ nrpe_cmd.disk }}]={{ nrpe_plugin_dir }}/check_disk -w 20% -c 10% -p {{ root_disk }}
+command[{{ nrpe_cmd.procs }}]={{ nrpe_plugin_dir }}/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
+command[{{ nrpe_cmd.zombie }}]={{ nrpe_plugin_dir }}/check_procs -w 5 -c 10 -s Z
+command[{{ nrpe_cmd.swap }}]={{ nrpe_plugin_dir }}/check_swap -w 60 -c 10
+command[{{ nrpe_cmd.uptime }}]={{ nrpe_plugin_dir }}/{{ nrpe_cmd.uptime }}
+command[check_tcp_es]={{ nrpe_plugin_dir }}/check_tcp -H localhost -p {{ elasticsearch_port }}
+command[check_jenkins]={{ nrpe_plugin_dir }}/check_tcp -H localhost -p {{ jenkins_port }}
+{% if ansible_distribution != "FreeBSD" %}
+command[check_raid]={{ nrpe_plugin_dir }}/check_raid
+{% endif %}
 {% if inventory_hostname in filemon_hosts_config %}
 {% for file in filemon_hosts_config[inventory_hostname] %}
-command[bsd_check_file_age_{{ loop.index0 }}]=/usr/local/libexec/nagios/check_file_age -f {{ file.path }} -w {{ file.warn_days | int * 86400 }} -c {{ file.crit_days | int * 86400 }}
+command[{{ nrpe_cmd.file_age }}_{{ loop.index0 }}]={{ nrpe_plugin_dir }}/check_file_age -f {{ file.path }} -w {{ file.warn_days | int * 86400 }} -c {{ file.crit_days | int * 86400 }}
 {% endfor %}
 {% else %}
-command[bsd_check_file_age]=/usr/local/libexec/nagios/check_file_age -f {{ filemon_target_file }} -w {{ filemon_warn_days | int * 86400 }} -c {{ filemon_crit_days | int * 86400 }}
-{% endif %}
-
-{% elif ansible_os_family == "Debian" %}
-
-command[check_users]=/usr/lib/nagios/plugins/check_users -w {{ warning_users }} -c {{ critical_users }}
-command[check_load]=/usr/lib/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
-command[check_root]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p {{ host_root_disk[0] }}
-command[check_zombie_procs]=/usr/lib/nagios/plugins/check_procs -w 5 -c 10 -s Z
-command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
-command[check_uptime]=/usr/lib/nagios/plugins/check_uptime
-command[check_tcp_es]=/usr/lib/nagios/plugins/check_tcp -H localhost -p {{ elasticsearch_port }}
-command[check_jenkins]=/usr/lib/nagios/plugins/check_tcp -H localhost -p {{ jenkins_port }}
-command[check_raid]=/usr/lib/nagios/plugins/check_raid
-command[check_swap]=/usr/lib/nagios/plugins/check_swap -w 60 -c 10
-{% if inventory_hostname in filemon_hosts_config %}
-{% for file in filemon_hosts_config[inventory_hostname] %}
-command[check_file_age_{{ loop.index0 }}]=/usr/lib/nagios/plugins/check_file_age -f {{ file.path }} -w {{ file.warn_days | int * 86400 }} -c {{ file.crit_days | int * 86400 }}
-{% endfor %}
-{% else %}
-command[check_file_age]=/usr/lib/nagios/plugins/check_file_age -f {{ filemon_target_file }} -w {{ filemon_warn_days | int * 86400 }} -c {{ filemon_crit_days | int * 86400 }}
-{% endif %}
-
-{% elif ansible_os_family in ["RedHat", "Rocky"] %}
-
-command[check_users]=/usr/lib64/nagios/plugins/check_users -w {{ warning_users }} -c {{ critical_users }}
-command[check_load]=/usr/lib64/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
-command[check_root]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -p {{ host_root_disk[0] }}
-command[check_zombie_procs]=/usr/lib64/nagios/plugins/check_procs -w 5 -c 10 -s Z
-command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
-command[check_uptime]=/usr/lib64/nagios/plugins/check_uptime
-command[check_tcp_es]=/usr/lib64/nagios/plugins/check_tcp -H localhost -p {{ elasticsearch_port }}
-command[check_jenkins]=/usr/lib64/nagios/plugins/check_tcp -H localhost -p {{ jenkins_port }}
-command[check_raid]=/usr/lib64/nagios/plugins/check_raid
-command[check_swap]=/usr/lib64/nagios/plugins/check_swap -w 60 -c 10
-{% if inventory_hostname in filemon_hosts_config %}
-{% for file in filemon_hosts_config[inventory_hostname] %}
-command[check_file_age_{{ loop.index0 }}]=/usr/lib64/nagios/plugins/check_file_age -f {{ file.path }} -w {{ file.warn_days | int * 86400 }} -c {{ file.crit_days | int * 86400 }}
-{% endfor %}
-{% else %}
-command[check_file_age]=/usr/lib64/nagios/plugins/check_file_age -f {{ filemon_target_file }} -w {{ filemon_warn_days | int * 86400 }} -c {{ filemon_crit_days | int * 86400 }}
-{% endif %}
-
+command[{{ nrpe_cmd.file_age }}]={{ nrpe_plugin_dir }}/check_file_age -f {{ filemon_target_file }} -w {{ filemon_warn_days | int * 86400 }} -c {{ filemon_crit_days | int * 86400 }}
 {% endif %}
 
 # The following examples allow user-supplied arguments and can

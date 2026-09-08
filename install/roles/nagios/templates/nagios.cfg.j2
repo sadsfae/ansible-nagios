@@ -77,11 +77,7 @@ precached_object_file={{ nagios_log_dir }}/objects.precache
 # defined as macros in this file and restrictive permissions (600)
 # can be placed on this file.
 
-{% if ansible_os_family == "RedHat" %}
-resource_file={{ nagios_dir }}/private/resource.cfg
-{% elif ansible_os_family == "Debian" %}
-resource_file={{ nagios_dir }}/resource.cfg
-{% endif %}
+resource_file={{ resource_file }}
 
 
 

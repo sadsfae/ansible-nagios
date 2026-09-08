@@ -44,6 +44,28 @@ critical_users: 30
 # this is used if you get compatibility issues with nrpe
 # valid options -2, or blank
 nrpe_version: -2
+# NRPE check command names, keyed by OS variant. Single source of truth
+# shared by the client (nrpe.cfg definitions) and the server (check_nrpe
+# service references). FreeBSD plugins use bsd_ prefixed names.
+nrpe_check_commands:
+  default:
+    users: check_users
+    load: check_load
+    disk: check_root
+    procs: check_total_procs
+    zombie: check_zombie_procs
+    swap: check_swap
+    uptime: check_uptime
+    file_age: check_file_age
+  freebsd:
+    users: bsd_check_users
+    load: bsd_check_load
+    disk: bsd_check_disk
+    procs: bsd_check_procs
+    zombie: bsd_check_zombie_procs
+    swap: bsd_check_swap
+    uptime: bsd_check_uptime
+    file_age: bsd_check_file_age
 
 ### services ports ###
 # jenkins
