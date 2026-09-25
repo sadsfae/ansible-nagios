@@ -370,6 +370,13 @@
     - services.cfg
   become: true
 
+- name: Install SELinux Python bindings
+  ansible.builtin.package:
+    name: python3-libselinux
+    state: present
+  become: true
+  when: ansible_os_family == "RedHat"
+
 - name: Apply SELinux boolean nagios_run_sudo
   ansible.posix.seboolean:
     name: nagios_run_sudo
