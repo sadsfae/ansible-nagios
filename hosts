@@ -13,6 +13,9 @@ host-01
 # use this for generic Linux servers using mdadm raid
 [servers_with_mdadm_raid]
 
+# inherits all server checks, adds file age monitoring
+[filemon_hosts]
+
 # inherits servers checks, includes http
 [webservers]
 
@@ -71,24 +74,6 @@ host-01
 # address
 # e.g. web01-idrac ansible_host=1.2.3.5
 [idrac]
-
-# Supermicro SSM health checks via FreeIPMI
-# See: install/group_vars/all.yml
-#      'supermicro_enable_checks: true' required
-#      Requires perl-IPC-Run and perl-IO-Tty
-# See: README notes
-# e.g. web02-supermicro-ipmi ansible_host=1.2.3.6
-# supermicro have different ipmi sensor ids
-# across models so you need to put them in different
-# inventory groups.
-# Supermicro 6048r 4U models
-[supermicro_6048r]
-
-# Supermicro 6018r 1U server models
-[supermicro_6018r]
-
-# Supermicro 1028r and 1029p models
-[supermicro_1028r]
 
 # QUADS Servers inherits server checks, includes quads_check_assignment check.
 # See: install/group_vars/all.yml for changing the default(=2hrs) time threshold.

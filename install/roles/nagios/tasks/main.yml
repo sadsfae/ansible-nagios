@@ -1,13 +1,68 @@
 ---
 # Playbook to install nagios server and generate hosts/checks
-# Refactored for modern Ansible modules and RHEL/Rocky 10 support
+# Refactored for modern Ansible modules, RHEL/Rocky 10, and Debian/Ubuntu support
 
 - name: Check Operating System
   ansible.builtin.fail:
-    msg: "You're not running a supported operating system (CentOS7, Rocky8+, RHEL7+)"
+    msg: "You're not running a supported operating system (CentOS7, Rocky8+, RHEL7+, Debian, Ubuntu)"
   when:
-    - ansible_os_family != "RedHat"
-    - ansible_distribution_major_version|int < 7
+    - ansible_os_family not in ["RedHat", "Debian"]
+
+# --- ADDED: Dynamic OS Variables ---
+- name: Set RedHat specific variables
+  ansible.builtin.set_fact:
+    nagios_pkg: nagios
+    nagios_dir: /etc/nagios
+    nagios_log_dir: /var/log/nagios
+    plugin_dir: /usr/lib64/nagios/plugins
+    web_service: httpd
+    web_user: apache
+    nagios_service: nagios
+    passwd_file: /etc/nagios/passwd
+    httpd_conf: /etc/httpd/conf/httpd.conf
+    command_file: /var/spool/nagios/cmd/nagios.cmd
+    resource_file: /etc/nagios/private/resource.cfg
+    nagios_web_path: nagios
+    nagios_cgi_dir: /usr/lib64/nagios/cgi-bin/
+    nagios_html_dir: /usr/share/nagios/html
+  when: ansible_os_family == "RedHat"
+
+- name: Set Debian specific variables
+  ansible.builtin.set_fact:
+    nagios_pkg: nagios4
+    nagios_dir: /etc/nagios4
+    nagios_log_dir: /var/log/nagios4
+    plugin_dir: /usr/lib/nagios/plugins
+    web_service: apache2
+    web_user: www-data
+    nagios_service: nagios4
+    passwd_file: /etc/nagios4/htpasswd.users
+    httpd_conf: /etc/apache2/ports.conf
+    command_file: /var/lib/nagios4/rw/nagios.cmd
+    resource_file: /etc/nagios4/resource.cfg
+    nagios_web_path: nagios4
+    nagios_cgi_dir: /usr/lib/cgi-bin/nagios4/
+    nagios_html_dir: /usr/share/nagios4/htdocs
+  when: ansible_os_family == "Debian"
+# -----------------------------------
+
+- name: Install gnupg2 (Legacy EL7)
+  ansible.builtin.package:
+    name: gnupg2
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version|int == 7
+
+- name: Install gnupg2
+  ansible.builtin.dnf:
+    name: gnupg2
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version|int >= 8
 
 - name: Import EPEL GPG Key
   ansible.builtin.rpm_key:
@@ -28,7 +83,8 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version|int >= 7
 
-- name: Install HTTPD and OpenSSL
+# --- MODIFIED: Split Web/Nagios dependencies by OS ---
+- name: Install Web and SSL Dependencies (RedHat)
   ansible.builtin.package:
     name:
       - httpd
@@ -36,31 +92,62 @@
       - mod_ssl
       - openssl
       - net-snmp-utils
-      - freeipmi
     state: present
   become: true
+  when: ansible_os_family == "RedHat"
 
-- name: Install SuperMicro Perl Dependencies
-  ansible.builtin.package:
+- name: Install Web and SSL Dependencies (Debian)
+  ansible.builtin.apt:
     name:
-      - perl-IPC-Run
-      - perl-IO-Tty
-      - OpenIPMI-modalias
+      - apache2
+      - apache2-utils
+      - ssl-cert
+      - openssl
+      - snmp
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Setup nagios SSL HTTPD vhost (RedHat)
+  ansible.builtin.template:
+    src: nagios.conf.j2
+    dest: /etc/httpd/conf.d/nagios.conf
+  become: true
+  when: ansible_os_family == "RedHat"
+
+- name: Setup nagios Apache config (Debian)
+  ansible.builtin.template:
+    src: nagios.conf.j2
+    dest: /etc/apache2/conf-available/nagios4-cgi.conf
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Enable Apache modules, SSL site, and nagios config (Debian)
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - a2enmod ssl
+    - a2enmod cgi
+    - a2enmod rewrite
+    - a2ensite default-ssl
+    - a2enconf nagios4-cgi
+  become: true
+  when: ansible_os_family == "Debian"
+  register: apache_modules
+  changed_when: "'already enabled' not in apache_modules.stdout and 'Enabling' in apache_modules.stdout"
+  failed_when: apache_modules.rc != 0 and 'already enabled' not in apache_modules.stderr
+
+- name: Install nagios-common first to create user/group (RedHat)
+  ansible.builtin.package:
+    name: nagios-common
     state: present
   become: true
-  when: supermicro_enable_checks|bool
+  when: ansible_os_family == "RedHat"
 
-- name: Setup nagios SSL HTTPD vhost
-  ansible.builtin.copy:
-    src: nagios.conf
-    dest: /etc/httpd/conf.d/
-  become: true
-
-- name: Install nagios packages and common plugins
+- name: Install nagios packages and plugins (RedHat)
   ansible.builtin.package:
     name:
       - nagios
-      - nagios-common
       - nagios-plugins-ssh
       - nagios-plugins-tcp
       - nagios-plugins-http
@@ -76,6 +163,31 @@
       - bc
     state: present
   become: true
+  when: ansible_os_family == "RedHat"
+
+- name: Install nagios4-common first to create user/group (Debian)
+  ansible.builtin.apt:
+    name: nagios4-common
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Install nagios packages and plugins (Debian)
+  ansible.builtin.apt:
+    name:
+      - nagios4
+      - monitoring-plugins
+      - monitoring-plugins-common
+      - monitoring-plugins-standard
+      - monitoring-plugins-basic
+      - nagios-nrpe-plugin
+      - bc
+      - python3-requests
+    state: present
+  become: true
+  when: ansible_os_family == "Debian"
+# -----------------------------------------------------
 
 - name: Install EL7 specific nagios packages
   ansible.builtin.package:
@@ -99,47 +211,48 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version|int >= 8
 
+# --- MODIFIED: All subsequent tasks use dynamic variables ---
 - name: Check nagios Users
   ansible.builtin.stat:
-    path: /etc/nagios/passwd
+    path: "{{ passwd_file }}"
   register: nagios_user_pwfile_exists
   become: true
 
 - name: Create empty password file
   ansible.builtin.file:
-    path: /etc/nagios/passwd
+    path: "{{ passwd_file }}"
     state: touch
     owner: root
-    group: apache
+    group: "{{ web_user }}"
     mode: '0640'
   when: not nagios_user_pwfile_exists.stat.exists
   become: true
 
 - name: Create nagios admin user
   ansible.builtin.command:
-    cmd: htpasswd -b /etc/nagios/passwd {{ nagios_username }} {{ nagios_password }}
+    cmd: htpasswd -b {{ passwd_file }} {{ nagios_username }} {{ nagios_password }}
   register: htpasswd_result
   changed_when: htpasswd_result.rc == 0
   become: true
 
 - name: Create nagios guest user
   ansible.builtin.command:
-    cmd: htpasswd -b /etc/nagios/passwd {{ nagios_ro_username }} {{ nagios_ro_password }}
+    cmd: htpasswd -b {{ passwd_file }} {{ nagios_ro_username }} {{ nagios_ro_password }}
   when: nagios_create_guest_user|bool
   register: htpasswd_guest
   changed_when: htpasswd_guest.rc == 0
   become: true
 
 - name: Configure nagios main configuration
-  ansible.builtin.copy:
-    src: nagios.cfg
-    dest: /etc/nagios/nagios.cfg
+  ansible.builtin.template:
+    src: nagios.cfg.j2
+    dest: "{{ nagios_dir }}/nagios.cfg"
   become: true
 
 - name: Copy idrac check plugin
   ansible.builtin.copy:
     src: idrac_2.2rc4
-    dest: /usr/lib64/nagios/plugins/idrac_2.2rc4
+    dest: "{{ plugin_dir }}/idrac_2.2rc4"
     mode: '0755'
   become: true
 
@@ -150,41 +263,40 @@
     mode: '0755'
   become: true
 
-- name: Create nagios socket tmp files
+# Cleanup deprecated IPMI/SuperMicro monitoring files
+- name: Remove deprecated IPMI configuration directory
   ansible.builtin.file:
-    path: "{{ supermicro_ipmicfg_path }}"
-    state: directory
-    owner: nagios
-    group: nagios
-    mode: '0777'
-    seuser: system_u
+    path: /etc/supermicro-ipmi-config
+    state: absent
   become: true
 
-- name: Configure SuperMicro IPMI Check
-  ansible.builtin.copy:
-    src: check_ipmi_sensor
-    dest: "{{ nagios_plugin_path }}/"
-    mode: '0755'
+- name: Remove deprecated IPMI check plugin
+  ansible.builtin.file:
+    path: "{{ plugin_dir }}/check_ipmi_sensor"
+    state: absent
   become: true
 
-- name: Generate the SuperMicro monitoring template
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ supermicro_ipmicfg_path }}/{{ item }}"
+- name: Remove deprecated IPMI config files from conf.d
+  ansible.builtin.file:
+    path: "{{ nagios_dir }}/conf.d/{{ item }}"
+    state: absent
   loop:
     - ipmi.cfg
+    - supermicro_6018r.cfg
+    - supermicro_6048r.cfg
+    - supermicro_1028r.cfg
   become: true
 
 - name: Generate the nagios conf.d directory
   ansible.builtin.file:
-    path: /etc/nagios/conf.d
+    path: "{{ nagios_dir }}/conf.d"
     state: directory
   become: true
 
 - name: Generate the nagios monitoring templates
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "/etc/nagios/conf.d/{{ item }}"
+    dest: "{{ nagios_dir }}/conf.d/{{ item }}"
     force: true
   loop:
     - oobservers.cfg
@@ -197,9 +309,6 @@
     - elkservers.cfg
     - elasticsearch.cfg
     - idrac.cfg
-    - supermicro_6018r.cfg
-    - supermicro_6048r.cfg
-    - supermicro_1028r.cfg
     - jenkins.cfg
     - dns.cfg
     - dns_with_mdadm_raid.cfg
@@ -208,13 +317,14 @@
     - dns_only.cfg
     - quads_servers.cfg
     - quads_servers_with_ssl.cfg
+    - filemon_hosts.cfg
   register: nagios_config
   become: true
 
 - name: Generate the nagios contact template and localhost config
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "/etc/nagios/objects/{{ item }}"
+    dest: "{{ nagios_dir }}/objects/{{ item }}"
     force: true
   loop:
     - contacts.cfg
@@ -225,14 +335,14 @@
 - name: Generate additional commands.cfg from template
   ansible.builtin.template:
     src: objects_commands.cfg.j2
-    dest: /etc/nagios/objects/commands.cfg
+    dest: "{{ nagios_dir }}/objects/commands.cfg"
     force: true
   become: true
 
 - name: Generate templated FreeNAS Python status script
   ansible.builtin.template:
     src: check_freenas.py.j2
-    dest: /usr/lib64/nagios/plugins/check_freenas.py
+    dest: "{{ plugin_dir }}/check_freenas.py"
     mode: '0755'
     force: true
   become: true
@@ -240,21 +350,21 @@
 - name: Configure quads-check-assignments
   ansible.builtin.copy:
     src: quads_check_assignment.py
-    dest: "{{ nagios_plugin_path }}/"
+    dest: "{{ plugin_dir }}/"
     mode: '0755'
   become: true
 
 - name: Copy check_ssl_cert Nagios check
   ansible.builtin.copy:
     src: check_ssl_cert
-    dest: /usr/lib64/nagios/plugins/
+    dest: "{{ plugin_dir }}/"
     mode: '0755'
   become: true
 
 - name: Generate the nagios user CGI template
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "/etc/nagios/{{ item }}"
+    dest: "{{ nagios_dir }}/{{ item }}"
   loop:
     - cgi.cfg
     - services.cfg
@@ -267,6 +377,7 @@
     persistent: true
   ignore_errors: true
   become: true
+  when: ansible_os_family == "RedHat"
 
 - name: Apply SELinux boolean logging_syslogd_run_nagios_plugins
   ansible.posix.seboolean:
@@ -275,38 +386,38 @@
     persistent: true
   ignore_errors: true
   become: true
+  when: ansible_os_family == "RedHat"
 
 - name: Create nagios socket tmp files (rw)
   ansible.builtin.file:
-    path: /var/log/nagios/rw
+    path: "{{ nagios_log_dir }}/rw"
     state: directory
     owner: nagios
-    group: nagios
+    group: "{{ web_user }}" # Debian requires www-data here
     mode: '0777'
-    seuser: system_u
   become: true
 
 - name: Create nagios results directory
   ansible.builtin.file:
-    path: /var/log/nagios/spool/checkresults
+    path: "{{ nagios_log_dir }}/spool/checkresults"
     state: directory
     owner: nagios
     group: nagios
     mode: '0755'
-    seuser: system_u
   become: true
 
-- name: Check/fix systemd service file
+- name: Check/fix systemd service file (RedHat)
   ansible.builtin.lineinfile:
     dest: /usr/lib/systemd/system/nagios.service
     regexp: "^ExecStopPost="
-    line: "ExecStopPost=/usr/bin/rm -f /var/spool/nagios/cmd/nagios.cmd /var/log/nagios/rw/nagios.qh"
+    line: "ExecStopPost=/usr/bin/rm -f {{ command_file }} {{ nagios_log_dir }}/rw/nagios.qh"
   register: systemd_nagios_changed
   become: true
+  when: ansible_os_family == "RedHat"
 
 - name: Set HTTP Listen Port
   ansible.builtin.lineinfile:
-    dest: /etc/httpd/conf/httpd.conf
+    dest: "{{ httpd_conf }}"
     regexp: "^Listen"
     line: "Listen {{ nagios_http_port }}"
   register: httpd_port_changed
@@ -315,33 +426,35 @@
 - name: Reload Systemd if needed  # noqa: no-handler
   ansible.builtin.systemd:
     daemon_reload: true
-  when: systemd_nagios_changed.changed
+  when:
+    - systemd_nagios_changed.changed is defined
+    - systemd_nagios_changed.changed
   become: true
 
 - name: Start nagios service
   ansible.builtin.service:
-    name: nagios
+    name: "{{ nagios_service }}"
     state: started
     enabled: true
   become: true
 
 - name: Restart nagios service if config changed  # noqa: no-handler
   ansible.builtin.service:
-    name: nagios
+    name: "{{ nagios_service }}"
     state: restarted
   when: nagios_config.changed or nagios_objects.changed
   become: true
 
 - name: Start HTTPD service
   ansible.builtin.service:
-    name: httpd
+    name: "{{ web_service }}"
     state: started
     enabled: true
   become: true
 
 - name: Restart HTTPD service if needed  # noqa: no-handler
   ansible.builtin.service:
-    name: httpd
+    name: "{{ web_service }}"
     state: restarted
   when: httpd_port_changed.changed or nagios_config.changed
   become: true

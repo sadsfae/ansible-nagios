@@ -1,3 +1,4 @@
+{% if groups.get('oobservers', []) %}
 # generic out-of-band interfaces
 # this will also work for most PDUs
 # checks ssh, ping and http
@@ -58,3 +59,4 @@ define service {
 	check_command			    check_ping!200.0,20%!600.0,60%
 	notifications_enabled		1
 }
+{% endif %}

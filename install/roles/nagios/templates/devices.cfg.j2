@@ -1,3 +1,4 @@
+{% if groups.get('devices', []) %}
 # ping only devices
 # this is for devices that only want ICMP monitored
 
@@ -25,3 +26,4 @@ define service {
 	check_command			    check_ping!200.0,20%!600.0,60%
 	notifications_enabled		1
 }
+{% endif %}

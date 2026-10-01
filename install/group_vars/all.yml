@@ -44,6 +44,28 @@ critical_users: 30
 # this is used if you get compatibility issues with nrpe
 # valid options -2, or blank
 nrpe_version: -2
+# NRPE check command names, keyed by OS variant. Single source of truth
+# shared by the client (nrpe.cfg definitions) and the server (check_nrpe
+# service references). FreeBSD plugins use bsd_ prefixed names.
+nrpe_check_commands:
+  default:
+    users: check_users
+    load: check_load
+    disk: check_root
+    procs: check_total_procs
+    zombie: check_zombie_procs
+    swap: check_swap
+    uptime: check_uptime
+    file_age: check_file_age
+  freebsd:
+    users: bsd_check_users
+    load: bsd_check_load
+    disk: bsd_check_disk
+    procs: bsd_check_procs
+    zombie: bsd_check_zombie_procs
+    swap: bsd_check_swap
+    uptime: bsd_check_uptime
+    file_age: bsd_check_file_age
 
 ### services ports ###
 # jenkins
@@ -100,6 +122,34 @@ freenas_pass: password
 # Time threshold (in hours) for active & unvalidated assignments
 quads_validate_check_threshold: 2
 
+### File Monitor Options ###
+# LEGACY: Simple single-file monitoring (backward compatible)
+# Path to file to monitor for age/timestamp
+filemon_target_file: /var/log/important.log
+# Warning threshold in days (alert when file is older than this)
+filemon_warn_days: 7
+# Critical threshold in days (alert when file is older than this)
+filemon_crit_days: 10
+
+# ADVANCED: Per-host multi-file monitoring configuration
+# Define files to monitor for each host in [filemon_hosts] group
+# If a host is defined here, it will use this config instead of the legacy options above
+filemon_hosts_config: {}
+#  logserver01:
+#    - path: /var/log/application.log
+#      warn_days: 7
+#      crit_days: 10
+#      description: "Application Log"
+#    - path: /var/log/batch/output.log
+#      warn_days: 1
+#      crit_days: 2
+#      description: "Daily Batch Job"
+#  webserver02:
+#    - path: /var/www/logs/access.log
+#      warn_days: 3
+#      crit_days: 5
+#      description: "Web Access Log"
+
 ### snmp options ###
 # these are for dell idrac only
 snmp_mib_path: /usr/share/snmp/mibs
@@ -126,57 +176,3 @@ idrac_sensor: true
 # system cpu
 idrac_cpu: true
 
-### SuperMicro IPMI Options ###
-supermicro_ipmi_user: ADMIN
-supermicro_ipmi_pass: ADMIN
-supermicro_priv_level: user
-supermicro_ipmicfg_path: /etc/supermicro-ipmi-config
-# freeipmi settings
-enable_legacy_output: on
-enable_oem_data: on
-disable_unrecognized_events: on
-enable_workaround_flags: nochecksumcheck,noauthcodecheck
-# supermicro individual checks
-# you can make your own, I am only adding the
-# bare basics and grouping by component and type as
-# sensor id values differ across model :(
-# NOTE: You must change this to true in order to
-# use supermicro checks, this enables an RPM dependency
-# that doesn't seem to be in RHEL but exists in CentOS
-# I have provided it for you in the docs if needed for RHEL7.
-supermicro_enable_checks: false
-# SuperMicro 6018r
-smc6018r_check_cpu: true
-smc6018r_check_mem: true
-smc6018r_check_temp: true
-## SuperMicro 6048r
-smc6048r_check_cpu: true
-smc6048r_check_mem: true
-smc6048r_check_disk: true
-smc6048r_check_temp: true
-## SuperMicro 1028r
-smc1028r_check_cpu: true
-smc1028r_check_mem: true
-smc1028r_check_disk: true
-smc1028r_check_temp: true
-# please see full mapping of sensor id below, you will
-# specify the sensors you want to monitor in a csv format:
-# https://github.com/thomas-krenn/check_ipmi_sensor_v3
-# sensor values are different across Supermicro models
-# to obtain them all run:
-# check_ipmi_sensor -H mgmt.ip.address -f /etc/supermicro-ipmi-config/ipmi.cfg -vvv --nosel
-## Sensor Id groupings per model
-# 1028r
-smc1028r_check_cpu_opts: 4,71,2483,2550
-smc1028r_check_mem_opts: 2617,2684,2751,2818
-smc1028r_check_disk_opts: 4024
-smc1028r_check_temp_opts: 205,272
-# 6048r
-smc6048r_check_cpu_opts: 4,71,2684,2751
-smc6048r_check_mem_opts: 1076,1210,1344,1478,1612,1746
-smc6048r_check_disk_opts: 4225
-smc6048r_check_temp_opts: 205,272
-# 6018r have no way to check internal flash disk via ipmi
-smc6018r_check_cpu_opts: 4,71,339,406
-smc6018r_check_mem_opts: 473,540,607,674,741,808
-smc6018r_check_temp_opts: 205,272

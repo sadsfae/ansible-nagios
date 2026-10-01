@@ -1,0 +1,70 @@
+# SAMPLE CONFIG SNIPPETS FOR APACHE WEB SERVER
+#
+# This file contains examples of entries that need
+# to be incorporated into your Apache web server
+# configuration file.  Customize the paths, etc. as
+# needed to fit your system.
+
+###
+RewriteEngine On
+# redirect HTTP to HTTPS
+RewriteRule ^/$ https://%{HTTP_HOST}/{{ nagios_web_path }}/$1 [R=301,L]
+RewriteRule ^({{ nagios_web_path }}/.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+
+ScriptAlias /{{ nagios_web_path }}/cgi-bin/ "{{ nagios_cgi_dir }}"
+
+<Directory "{{ nagios_cgi_dir }}">
+   SSLRequireSSL
+   Options ExecCGI
+   AllowOverride None
+
+   AuthName "Nagios Access"
+   AuthType Basic
+   AuthUserFile {{ passwd_file }}
+
+   <IfModule mod_authz_core.c>
+      # Apache 2.4
+      # Require local
+      Require valid-user
+   </IfModule>
+   <IfModule !mod_authz_core.c>
+      # Apache 2.2
+      Order allow,deny
+      Allow from all
+      #  Order deny,allow
+      #  Deny from all
+      #  Allow from 127.0.0.1
+      Require valid-user
+   </IfModule>
+</Directory>
+
+# use an alias for nagios
+{% if ansible_os_family == "Debian" %}
+Alias /{{ nagios_web_path }}/stylesheets /etc/nagios4/stylesheets
+{% endif %}
+Alias /{{ nagios_web_path }} "{{ nagios_html_dir }}"
+
+<Directory "{{ nagios_html_dir }}">
+   SSLRequireSSL
+   Options None
+   AllowOverride None
+
+   AuthName "Nagios Access"
+   AuthType Basic
+   AuthUserFile {{ passwd_file }}
+
+   <IfModule mod_authz_core.c>
+      # Apache 2.4
+      # Require local
+      Require valid-user
+   </IfModule>
+   <IfModule !mod_authz_core.c>
+      # Apache 2.2
+      Order allow,deny
+      Allow from all
+      #  Order deny,allow
+      #  Deny from all
+      #  Allow from 127.0.0.1
+      Require valid-user
+   </IfModule>
+</Directory>

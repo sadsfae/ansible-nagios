@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 __author__ = "Nguyen Duc Trung Dung"
 __contact__ = "ndtdung@spsvietnam.vn - dung.nguyendt@gmail.com"
 __blog__ = "dybn.blogspot.com"
@@ -162,7 +163,7 @@ all_hardware = {
         r"physicalDiskCapacityInMB\.|"
         r"physicalDiskSpareState\.|"
         r"physicalDiskMediaType\.|"
-        r"physicalDiskPowerState\.",
+        r"physicalDiskState\.",
     ],
     "VDISK": [
         "virtualDiskTable",
@@ -941,6 +942,16 @@ class PARSER:
     def main(self):
         hw_dict = {}
         hw_quantity = 0
+
+        self.snmp_command = "snmpwalk"  # use walk when check group or all
+        # --- Safely fetch and parse power state ---
+        power_state = "unknown"
+        power_snmp = self.get_snmp(oids="systemPowerState")
+        if power_snmp and len(power_snmp) > 0:
+            parts = power_snmp[0].split()
+            if len(parts) > 1:
+                power_state = parts[1].lower()
+
         if self.order is None:
             self.snmp_command = "snmpwalk"  # use walk when check group or all
             snmp_data = self.get_snmp(oids=self.hardware[0])
@@ -995,15 +1006,16 @@ class PARSER:
         # --re-format output to suit hw type. Power is the most messed part!
         output = []
         exit_code = [0, "OK"]
+        if power_state == "off":
+            output.append("Powered off.  Assuming OK.")
+            return output, exit_code
         if self.hardware[2] == "PDisk":
             value_on_alert = [
-                3,
-                8,
             ]  # raise alert on these value. Mapped with all_hardware as list order.
             # int type for status check, string type for range check
             if self.alert is True:
                 hw_dict, exit_code = self.raise_alert(hw_dict, value_on_alert)
-            tmp = "%s %s (%s) %s GB: %s, PowerStat: %s, HotSpare: %s [%s, %s, S/N: %s]"
+            tmp = "%s %s (%s) %s GB: %s, HotSpare: %s [%s, %s, S/N: %s]"
             for hw in hw_dict.values():
                 for v in value_on_alert:
                     v = int(v)
@@ -1019,14 +1031,19 @@ class PARSER:
                         hw[0],
                         hw[1].split()[-1].replace('"', ""),
                         hw_5,
-                        hw[3],
-                        hw[8],
+                        hw[3].upper(),
                         hw[6].replace("HotSpare", "").replace("notASpare", "no"),
                         hw[2].replace('"', ""),
                         hw[7].upper(),
                         hw[4].replace('"', ""),
                     )
                 )
+                if hw[3].startswith("unknown") or hw[3].startswith("foreign") or hw[3].startswith("readonly") or hw[3].startswith("nonraid"):
+                    if exit_code[0] < 1:
+                        exit_code = [1, 'WARN']
+                elif hw[3].startswith("offline") or hw[3].startswith("blocked") or hw[3].startswith("failed") or hw[3].startswith("removed"):
+                    if exit_code[0] < 2:
+                        exit_code = [2, 'CRIT']
         elif self.hardware[2] == "Fan":
             value_on_alert = [1, 2, "3"]
             if self.alert is True:

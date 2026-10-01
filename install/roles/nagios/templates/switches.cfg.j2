@@ -1,3 +1,4 @@
+{% if groups.get('switches', []) %}
 # ICMP and ssh checks of switches
 define hostgroup {
 	hostgroup_name switches
@@ -29,3 +30,4 @@ define service {
 	check_command			    check_ping!200.0,20%!600.0,60%
 	notifications_enabled		1
 }
+{% endif %}

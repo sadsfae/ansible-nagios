@@ -1,3 +1,4 @@
+{% if groups.get('idrac', []) %}
 # Check server health via the idrac
 # this == for Dell servers ONLY
 # these values are configurable
@@ -165,3 +166,4 @@ define service {
 	check_command			    check_ping!200.0,20%!600.0,60%
 	notifications_enabled		1
 }
+{% endif %}

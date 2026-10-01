@@ -1,15 +1,30 @@
 # ansible-nagios
 
-Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/RHEL/Fedora/FreeBSD)
+Playbook for setting up the Nagios monitoring server and clients
 
 ![Nagios](/image/ansible-nagios.png?raw=true)
 
 [![GA](https://github.com/sadsfae/ansible-nagios/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/sadsfae/ansible-nagios/actions)
 
+## Table of Contents
+
+- [What does it do?](#what-does-it-do)
+- [How do I use it?](#how-do-i-use-it)
+- [Requirements](#requirements)
+  - [Collection Dependencies](#collection-dependencies)
+- [Notes](#notes)
+- [Supported Service Checks](#supported-service-checks)
+- [Nagios Server Instructions](#nagios-server-instructions)
+- [Known Issues](#known-issues)
+- [Mass-generating Ansible Inventory](#mass-generating-ansible-inventory)
+- [Demonstration](#demonstration)
+- [iDRAC Server Health Details](#idrac-server-health-details)
+- [Files](#files)
+
 ## What does it do?
 
-- Automated deployment of Nagios Server on CentOS7, Rocky 8/9 or RHEL 7/8/9/10
-- Automated deployment of Nagios client on CentOS6/7/8, RHEL6/7/8/9/10 or Rocky, Fedora and FreeBSD
+- Automated deployment of Nagios Server on CentOS7, Rocky 8/9 or RHEL 7/8/9/10, Debian/Ubuntu
+- Automated deployment of Nagios client on CentOS6/7/8, RHEL6/7/8/9/10 or Rocky, Fedora, Ubuntu/Debian and FreeBSD
   - Generates service checks and monitored hosts from Ansible inventory
   - Generates comprehensive checks for the Nagios server itself
   - Generates comprehensive checks for all hosts/services via NRPE
@@ -28,17 +43,31 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
 
 ## Requirements
 
-- CentOS7 or RHEL7/8/9 or Rocky 8/9 for Nagios server only (for now).
-- RHEL6/7/8/9, CentOS6/7/8/9, Fedora or FreeBSD for the NRPE Nagios client
-- If you require SuperMicro server monitoring via IPMI (optional) then do the following
-  - Install `perl-IPC-Run` and `perl-IO-Tty` RPMs for RHEL7 for optional IPMI
-    sensor monitoring on SuperMicro.
-    - I've placed them [here](https://funcamp.net/w/rpm/el7/) if you can't find
-      them, CentOS7 has them however.
-  - Modify `install/group_vars/all.yml` to include
-    `supermicro_enable_checks: true`
-- Please note I'll likely remove IPMI sensor monitoring support because it's a
-  real pain and not that reliable, SNMP with MiB is better.
+- Rocky, RHEL, Debian, Ubuntu Linux for Nagios server only 
+- Rocky, RHEL, Debian, Ubuntu, Fedora Linux and FreeBSD for NRPE Nagios client. 
+
+### Collection Dependencies
+
+This role requires the following Ansible collections:
+- `community.general` (for UFW firewall management)
+- `ansible.posix` (for firewalld and SELinux boolean management)
+
+**Installing via System Packages (Recommended):**
+
+RHEL/Rocky/Fedora:
+```bash
+sudo dnf install ansible-collection-community-general ansible-collection-ansible-posix
+```
+
+Debian/Ubuntu:
+```bash
+sudo apt install ansible-collection-community-general ansible-collection-ansible-posix
+```
+
+**Alternative: Installing via Ansible Galaxy:**
+```bash
+ansible-galaxy collection install -r requirements.yml
+```
 
 ## Notes
 
@@ -55,7 +84,8 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
   - Generic Linux servers *(ping, ssh, load, users, procs, uptime, disk space,
     swap, zombie procs)*
   - Generic Linux servers with MDADM RAID (same as above)
-  - [ELK servers](https://github.com/sadsfae/ansible-elk) *(same as servers
+  - File Monitor hosts *(same as servers plus file age monitoring with configurable thresholds)*
+  - [ELK servers](https://github.com/sadsfae/ansible-nagios) *(same as servers
     plus elasticsearch and Kibana)*
   - Elasticsearch *(same as servers plus TCP/9200 for elasticsearch)*
   - Webservers *(same as servers plus 80/TCP for webserver)*
@@ -72,10 +102,6 @@ Playbook for setting up the Nagios monitoring server and clients (CentOS/Rocky/R
   - Dell iDRAC server checks via @dangmocrang [check_idrac](https://github.com/dangmocrang/check_idrac)
     - You can select which checks you want in `install/group_vars/all.yml`
       - CPU, DISK, VDISK, PS, POWER, TEMP, MEM, FAN
-  - SuperMicro server checks via the IPMI interface.
-    - CPU, DISK, PS, TEMP, MEM: or anything supported via `freeipmi` sensors.
-    - *Note: This is **not** the best way to monitor things, SNMP checks are WIP
-      once we purchase licenses for them for our systems*
   - [QUADS](https://quads.dev/about-quads) Servers *(same as server plus
     alerting on active assignments that are not validated after a time
     threshold)*
@@ -128,13 +154,6 @@ jenkins01
 database01-idrac ansible_host=192.168.0.106
 
 [quads_servers]
-
-[supermicro-6048r]
-web01-supermicro-ipmi ansible_host=192.168.0.108
-
-[supermicro-6018r]
-
-[supermicro-1028r]
 ```
 
 - Run the playbook
@@ -183,13 +202,6 @@ above command again.
 
 ```bash
 setenforce 1
-```
-
-- If you have errors on RHEL7 you may need a few [Perl packages](https://funcamp.net/w/rpm/el7/)
-  if you opted to include SuperMicro monitoring via:
-
-```yaml
-supermicro_enable_checks: true
 ```
 
 ## Mass-generating Ansible Inventory
@@ -245,7 +257,6 @@ Ansible inventory group respectively.
 │       │       └── main.yml
 │       ├── nagios
 │       │   ├── files
-│       │   │   ├── check_ipmi_sensor
 │       │   │   ├── idrac_2.2rc4
 │       │   │   ├── idrac-smiv2.mib
 │       │   │   ├── nagios.cfg
@@ -266,16 +277,12 @@ Ansible inventory group respectively.
 │       │       ├── elkservers.cfg.j2
 │       │       ├── freenas.cfg.j2
 │       │       ├── idrac.cfg.j2
-│       │       ├── ipmi.cfg.j2
 │       │       ├── jenkins.cfg.j2
 │       │       ├── localhost.cfg.j2
 │       │       ├── oobservers.cfg.j2
 │       │       ├── servers.cfg.j2
 │       │       ├── servers_with_mdadm_raid.cfg.j2
 │       │       ├── services.cfg.j2
-│       │       ├── supermicro_1028r.cfg.j2
-│       │       ├── supermicro_6018r.cfg.j2
-│       │       ├── supermicro_6048r.cfg.j2
 │       │       ├── switches.cfg.j2
 │       │       └── webservers.cfg.j2
 │       └── nagios_client
@@ -293,5 +300,5 @@ Ansible inventory group respectively.
 └── tests
     └── test-requirements.txt
 
-21 directories, 43 files
+21 directories, 38 files
 ```

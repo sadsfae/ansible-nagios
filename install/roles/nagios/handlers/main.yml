@@ -1,6 +1,11 @@
 ---
-- name: restart iptables
+- name: save iptables
+  ansible.builtin.shell: iptables-save > /etc/sysconfig/iptables
   become: true
-  service:
-    name: iptables
-    state: restarted
+  when: ansible_os_family in ["RedHat", "Rocky"]
+
+- name: save iptables debian
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+  become: true
+  when: ansible_os_family == "Debian"
+  listen: save iptables

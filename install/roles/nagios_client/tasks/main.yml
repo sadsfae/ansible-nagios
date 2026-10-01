@@ -2,63 +2,110 @@
 # install and setup NRPE and checks
 
 - name: Check Operating System
-  fail:
-    msg: "You're not running a supported operating system (CentOS, RHEL 7+, Rocky, Fedora or FreeBSD)"
+  ansible.builtin.fail:
+    msg: "You're not running a supported operating system (CentOS, RHEL 7+, Rocky, Fedora, Debian, Ubuntu, or FreeBSD)"
   when:
-    - ansible_os_family != "RedHat"
-    - ansible_os_family != "Rocky"
-    - ansible_distribution_major_version|int < 7
-    - ansible_os_family != "FreeBSD"
+    - ansible_os_family not in ["RedHat", "Rocky", "Debian", "FreeBSD"]
 
-- name: Import EPEL GPG Key
-  rpm_key:
-    key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
-    state: present
-  become: true
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version|int in [7, 8, 9, 10]
+- name: Set Debian specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nagios/nrpe.pid
+    nrpe_user: nagios
+    nrpe_group: nagios
+    nrpe_plugin_dir: /usr/lib/nagios/plugins
+    nrpe_sudoers_dir: /etc/sudoers.d
+    sudo_bin: /usr/bin/sudo
+  when: ansible_os_family == "Debian"
 
-- name: Install EPEL repo (EL7)
-  yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+- name: Set RedHat specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nrpe/nrpe.pid
+    nrpe_user: nrpe
+    nrpe_group: nrpe
+    nrpe_plugin_dir: /usr/lib64/nagios/plugins
+    nrpe_sudoers_dir: /etc/sudoers.d
+    sudo_bin: /usr/bin/sudo
+  when: ansible_os_family in ["RedHat", "Rocky"]
+
+- name: Set FreeBSD specific NRPE variables
+  ansible.builtin.set_fact:
+    nrpe_pid_file: /var/run/nrpe/nrpe.pid
+    nrpe_user: nrpe
+    nrpe_group: nrpe
+    nrpe_plugin_dir: /usr/local/libexec/nagios
+    nrpe_sudoers_dir: /usr/local/etc/sudoers.d
+    sudo_bin: /usr/local/bin/sudo
+  when: ansible_os_family == "FreeBSD"
+
+- name: Install gnupg2 (Legacy EL7)
+  ansible.builtin.package:
+    name: gnupg2
     state: present
   become: true
   when:
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version|int == 7
 
+- name: Install gnupg2
+  ansible.builtin.dnf:
+    name: gnupg2
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version|int >= 8
+
+- name: Import EPEL GPG Key
+  ansible.builtin.rpm_key:
+    key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version | int in [7, 8, 9, 10]
+
+- name: Install EPEL repo (EL7)
+  ansible.builtin.yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version | int == 7
+
 - name: Install EPEL repo (EL8+)
-  dnf:
+  ansible.builtin.dnf:
     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     state: present
   become: true
   when:
     - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version|int in [8, 9, 10]
+    - ansible_distribution_major_version | int in [8, 9, 10]
 
 - name: Install Python3 for Fedora/EL8+ minimal clients
-  dnf:
+  ansible.builtin.dnf:
     name: python3
     state: present
   become: true
   when:
-    - ansible_distribution_major_version|int >= 8
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int >= 8
     - ansible_system == "Linux"
 
 - name: Symlink Python to Python3 for EL8/Fedora
-  file:
+  ansible.builtin.file:
     src: /usr/bin/python3
     dest: /usr/bin/python
     state: link
   when:
-    - ansible_distribution_major_version|int >= 8
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int >= 8
     - ansible_python_version is version('3.6', '<')
     - ansible_system == "Linux"
   ignore_errors: true
 
 - name: Install NRPE and Common Plugins (EL7)
-  yum:
+  ansible.builtin.yum:
     name:
       - nrpe
       - nagios-plugins-load
@@ -68,14 +115,15 @@
       - nagios-plugins-users
       - nagios-plugins-disk
       - nagios-plugins-tcp
+      - nagios-plugins-file_age
     state: present
   become: true
   when:
-    - ansible_distribution_major_version|int <= 7
+    - ansible_distribution_major_version | int <= 7
     - ansible_os_family == "RedHat"
 
 - name: Install NRPE and Common Plugins (EL8+)
-  dnf:
+  ansible.builtin.dnf:
     name:
       - nrpe
       - nagios-plugins-load
@@ -85,28 +133,42 @@
       - nagios-plugins-users
       - nagios-plugins-disk
       - nagios-plugins-tcp
+      - nagios-plugins-file_age
     state: present
   become: true
   when:
-    - ansible_distribution_major_version|int >= 8
-    - ansible_system == "Linux"
+    - ansible_distribution_major_version | int >= 8
+    - ansible_os_family == "RedHat"
+
+- name: Install NRPE and Common Plugins (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name:
+      - nagios-nrpe-server
+      - monitoring-plugins
+      - nagios-plugins-contrib
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
 
 - name: Check if BSD ports structure exists
-  stat:
+  ansible.builtin.stat:
     path: /usr/ports/net-mgmt/nagios-plugins/distinfo
   when: ansible_system == "FreeBSD"
   register: bsd_ports_structure
   ignore_errors: true
 
 - name: Fetch new BSD ports tree, this might take a while.
-  command: portsnap auto
+  ansible.builtin.command: portsnap auto
   become: true
   when:
     - ansible_system == "FreeBSD"
+    - bsd_ports_structure.stat.exists is defined
     - bsd_ports_structure.stat.exists
+  changed_when: true
 
 - name: Install NRPE and Common Plugins for FreeBSD, this might take a while.
-  pkgng:
+  community.general.pkgng:
     name:
       - nrpe3
       - nagios-plugins
@@ -114,12 +176,12 @@
   when: ansible_system == "FreeBSD"
 
 - name: Install libsemanage-python (EL7)
-  yum:
+  ansible.builtin.yum:
     name: libsemanage-python
     state: present
   become: true
   when:
-    - ansible_distribution_major_version|int <= 7
+    - ansible_distribution_major_version | int <= 7
     - ansible_os_family == "RedHat"
   ignore_errors: true
 
@@ -130,7 +192,7 @@
     query: "[?mount=='/'].device"
 
 - name: Setup NRPE client configuration
-  template:
+  ansible.builtin.template:
     src: nrpe.cfg.j2
     dest: /etc/nagios/nrpe.cfg
     force: true
@@ -138,65 +200,91 @@
   when: ansible_system == "Linux"
 
 - name: Setup NRPE client configuration on FreeBSD
-  template:
+  ansible.builtin.template:
     src: nrpe.cfg.j2
     dest: /usr/local/etc/nrpe.cfg
     force: true
   become: true
   when: ansible_system == "FreeBSD"
 
-- name: Copy mdadm check_raid plugin
-  copy:
+- name: Copy mdadm check_raid plugin (RedHat/Rocky)
+  ansible.builtin.copy:
     src: check_raid
     dest: /usr/lib64/nagios/plugins/check_raid
-    mode: "0755"
+    mode: '0755'
   become: true
-  when: ansible_system == "Linux"
+  when:
+    - ansible_system == "Linux"
+    - ansible_os_family in ["RedHat", "Rocky"]
+
+- name: Copy mdadm check_raid plugin (Debian/Ubuntu)
+  ansible.builtin.copy:
+    src: check_raid
+    dest: /usr/lib/nagios/plugins/check_raid
+    mode: '0755'
+  become: true
+  when: ansible_os_family == "Debian"
 
 - name: Copy uptime check tool for FreeBSD
-  copy:
+  ansible.builtin.copy:
     src: bsd_check_uptime.sh
     dest: /usr/local/libexec/nagios/bsd_check_uptime
-    mode: "0755"
+    mode: '0755'
   become: true
   when: ansible_system == "FreeBSD"
 
-# SELinux boolean for nagios
+- name: Manage NRPE NOPASSWD sudo for check_file_age (filemon_hosts)
+  community.general.sudoers:
+    name: nagios_check_file_age
+    state: "{{ 'present' if inventory_hostname in groups.get('filemon_hosts', []) else 'absent' }}"
+    user: "{{ nrpe_user }}"
+    runas: root
+    commands: "{{ nrpe_plugin_dir }}/check_file_age"
+    nopassword: true
+    sudoers_path: "{{ nrpe_sudoers_dir }}"
+    validation: required
+  become: true
+
 - name: Apply SELinux boolean nagios_run_sudo
-  seboolean:
+  ansible.posix.seboolean:
     name: nagios_run_sudo
     state: true
     persistent: true
   ignore_errors: true
   when:
-    - ansible_distribution_major_version|int <= 7
-    - ansible_os_family == "RedHat"
+    - ansible_os_family in ["RedHat", "Rocky"]
   become: true
 
-# SELinux boolean for nagios
 - name: Apply SELinux boolean logging_syslogd_run_nagios_plugins
-  seboolean:
+  ansible.posix.seboolean:
     name: logging_syslogd_run_nagios_plugins
     state: true
     persistent: true
   ignore_errors: true
   when:
-    - ansible_distribution_major_version|int <= 7
-    - ansible_os_family == "RedHat"
+    - ansible_os_family in ["RedHat", "Rocky"]
   become: true
 
-- name: Enable and Restart NRPE service
-  service:
+- name: Enable and Restart NRPE service (RedHat/Rocky 7+)
+  ansible.builtin.service:
     name: nrpe
     state: restarted
     enabled: true
   become: true
   when:
-    - ansible_distribution_major_version|int >= 7
-    - ansible_system == "Linux"
+    - ansible_distribution_major_version | default(0) | int >= 7
+    - ansible_os_family in ["RedHat", "Rocky"]
+
+- name: Enable and Restart NRPE service (Debian/Ubuntu)
+  ansible.builtin.service:
+    name: nagios-nrpe-server
+    state: restarted
+    enabled: true
+  become: true
+  when: ansible_os_family == "Debian"
 
 - name: Enable NRPE service on FreeBSD
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/rc.conf
     line: nrpe3_enable="YES"
     state: present
@@ -204,18 +292,18 @@
   when: ansible_system == "FreeBSD"
 
 - name: Start NRPE service on FreeBSD
-  service:
+  ansible.builtin.service:
     name: nrpe3
     enabled: true
     state: restarted
   when: ansible_system == "FreeBSD"
 
 - name: Enable and Restart NRPE service (EL6)
-  service:
+  ansible.builtin.service:
     name: nrpe
     state: restarted
     enabled: true
   become: true
   when:
-    - ansible_distribution_major_version|int <= 6
+    - ansible_distribution_major_version | default(0) | int <= 6
     - ansible_os_family == "RedHat"

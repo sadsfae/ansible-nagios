@@ -1,0 +1,13 @@
+---
+# Ansible Collections Required for this role
+#
+# Install via system packages (recommended):
+#   RHEL/Rocky/Fedora: sudo dnf install ansible-collection-community-general ansible-collection-ansible-posix
+#   Debian/Ubuntu: sudo apt install ansible-collection-community-general ansible-collection-ansible-posix
+#
+# Alternative installation via Ansible Galaxy:
+#   ansible-galaxy collection install -r requirements.yml
+
+collections:
+  - name: community.general
+  - name: ansible.posix

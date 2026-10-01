@@ -1,5 +1,4 @@
-# do not include galaxy files
-meta/main.yml
 # no retry files
 *.retry
+.claude/
 .ansible

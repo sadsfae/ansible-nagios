@@ -1,3 +1,4 @@
+{% if groups.get('dns_only', []) %}
 # dns/ping query only against dns service
 # this is for devices that only dns and ICMP monitored
 
@@ -33,4 +34,4 @@ define service {
 	check_command		   check_dns
 	notifications_enabled  1
 }
-
+{% endif %}

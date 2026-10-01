@@ -1,13 +1,19 @@
 ---
 # print informational messages after successful playbook run
+
+- name: Set OS specific instruction variables
+  ansible.builtin.set_fact:
+    nagios_url_path: "{{ '/nagios4' if ansible_os_family == 'Debian' else '/nagios' }}"
+    nagios_passwd_file: "{{ '/etc/nagios4/htpasswd.users' if ansible_os_family == 'Debian' else '/etc/nagios/passwd' }}"
+
 - name: Display nagios information
-  debug:
-    msg="You can access nagios at https://{{ansible_fqdn}}/nagios using {{nagios_username}} / {{nagios_password}}"
+  ansible.builtin.debug:
+    msg: "You can access nagios at https://{{ ansible_fqdn }}{{ nagios_url_path }} using {{ nagios_username }} / {{ nagios_password }}"
 
 - name: Display nagios guest information
-  debug:
-    msg="Guest read only users at https://{{ansible_fqdn}}/nagios using {{nagios_ro_username}} / {{nagios_ro_password}}"
+  ansible.builtin.debug:
+    msg: "Guest read only users at https://{{ ansible_fqdn }}{{ nagios_url_path }} using {{ nagios_ro_username }} / {{ nagios_ro_password }}"
 
 - name: Display user password change information
-  debug:
-    msg="Run the following to change the nagios password --> htpasswd /etc/nagios/passwd nagiosadmin"
+  ansible.builtin.debug:
+    msg: "Run the following to change the nagios password --> htpasswd {{ nagios_passwd_file }} {{ nagios_username }}"
