@@ -245,6 +245,15 @@
     validation: required
   become: true
 
+- name: Install SELinux Python bindings
+  ansible.builtin.package:
+    name: python3-libselinux
+    state: present
+  become: true
+  when:
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_system == "Linux"
+
 - name: Apply SELinux boolean nagios_run_sudo
   ansible.posix.seboolean:
     name: nagios_run_sudo
