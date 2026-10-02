@@ -40,6 +40,9 @@ critical_proc: 1000
 # threshold for # of logged in users
 warning_users: 15
 critical_users: 30
+# threshold for system load averages (1,5,15 min)
+warning_load: [15, 10, 5]
+critical_load: [30, 25, 20]
 # NRPE version, default is -2 for version 2
 # this is used if you get compatibility issues with nrpe
 # valid options -2, or blank

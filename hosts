@@ -10,6 +10,9 @@ host-01
 # use this for generic Linux or FreeBSD servers
 [servers]
 
+# if you have a busy server, you can adjust the warning and critical levels for load
+#high-load-host.example.com warning_load=60,50,40 critical_load=90,75,60
+
 # use this for generic Linux servers using mdadm raid
 [servers_with_mdadm_raid]
 

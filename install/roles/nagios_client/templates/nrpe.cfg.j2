@@ -194,7 +194,7 @@ connection_timeout=300
 {% set root_disk = ansible_mounts[0]['device'] if ansible_distribution == "FreeBSD" else host_root_disk[0] %}
 
 command[{{ nrpe_cmd.users }}]={{ nrpe_plugin_dir }}/check_users -w {{ warning_users }} -c {{ critical_users }}
-command[{{ nrpe_cmd.load }}]={{ nrpe_plugin_dir }}/check_load -w 15,10,5 -c 30,25,20
+command[{{ nrpe_cmd.load }}]={{ nrpe_plugin_dir }}/check_load -w {{ warning_load | join(',') }} -c {{ critical_load | join(',') }}
 command[{{ nrpe_cmd.disk }}]={{ nrpe_plugin_dir }}/check_disk -w 20% -c 10% -p {{ root_disk }}
 command[{{ nrpe_cmd.procs }}]={{ nrpe_plugin_dir }}/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
 command[{{ nrpe_cmd.zombie }}]={{ nrpe_plugin_dir }}/check_procs -w 5 -c 10 -s Z
