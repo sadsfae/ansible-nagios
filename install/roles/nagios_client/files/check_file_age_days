@@ -1,0 +1,98 @@
+#!/bin/sh
+# check_file_age_days - Nagios/NRPE plugin reporting a file's age in DAYS.
+#
+# The stock monitoring-plugins check_file_age reports the age in seconds. This
+# drop-in replacement takes its warning/critical thresholds in whole days and
+# reports the measured age in days. Portable across Linux and FreeBSD.
+#
+# Usage: check_file_age_days -f <file> -w <warn_days> -c <crit_days>
+#   -f  path to the file to check
+#   -w  warning threshold in days  (age >= this -> WARNING)
+#   -c  critical threshold in days (age >= this -> CRITICAL)
+
+PROGNAME=$(basename "$0")
+
+STATE_OK=0
+STATE_WARNING=1
+STATE_CRITICAL=2
+STATE_UNKNOWN=3
+
+file=""
+warn_days=""
+crit_days=""
+
+usage() {
+    echo "Usage: $PROGNAME -f <file> -w <warn_days> -c <crit_days>"
+}
+
+while getopts "f:w:c:h" opt; do
+    case "$opt" in
+        f) file=$OPTARG ;;
+        w) warn_days=$OPTARG ;;
+        c) crit_days=$OPTARG ;;
+        h) usage; exit "$STATE_UNKNOWN" ;;
+        *) usage; exit "$STATE_UNKNOWN" ;;
+    esac
+done
+
+if [ -z "$file" ] || [ -z "$warn_days" ] || [ -z "$crit_days" ]; then
+    usage
+    exit "$STATE_UNKNOWN"
+fi
+
+# Thresholds must be non-negative integers (days). Guard against config typos:
+# an empty/non-numeric value would otherwise evaluate to 0 and alert constantly,
+# and a fractional value would abort the arithmetic below.
+for val in "$warn_days" "$crit_days"; do
+    case "$val" in
+        ''|*[!0-9]*)
+            echo "FILE_AGE UNKNOWN: thresholds must be non-negative integer days (got '$val')"
+            exit "$STATE_UNKNOWN"
+            ;;
+    esac
+done
+
+if [ ! -e "$file" ]; then
+    echo "FILE_AGE CRITICAL: $file does not exist"
+    exit "$STATE_CRITICAL"
+fi
+
+# mtime as epoch seconds: GNU/Linux stat vs BSD stat.
+if ! mtime=$(stat -c %Y "$file" 2>/dev/null); then
+    if ! mtime=$(stat -f %m "$file" 2>/dev/null); then
+        echo "FILE_AGE UNKNOWN: unable to stat $file"
+        exit "$STATE_UNKNOWN"
+    fi
+fi
+
+case "$mtime" in
+    ''|*[!0-9]*)
+        echo "FILE_AGE UNKNOWN: could not read a valid mtime for $file"
+        exit "$STATE_UNKNOWN"
+        ;;
+esac
+
+now=$(date +%s)
+age_secs=$((now - mtime))
+[ "$age_secs" -lt 0 ] && age_secs=0
+
+# Age in days to one decimal place, using integer arithmetic (tenths of a day).
+day_secs=86400
+age_tenths=$((age_secs * 10 / day_secs))
+age_days="$((age_tenths / 10)).$((age_tenths % 10))"
+
+warn_secs=$((warn_days * day_secs))
+crit_secs=$((crit_days * day_secs))
+
+perfdata="age=${age_days}d;${warn_days};${crit_days};0"
+
+if [ "$age_secs" -ge "$crit_secs" ]; then
+    echo "FILE_AGE CRITICAL: $file is $age_days days old | $perfdata"
+    exit "$STATE_CRITICAL"
+elif [ "$age_secs" -ge "$warn_secs" ]; then
+    echo "FILE_AGE WARNING: $file is $age_days days old | $perfdata"
+    exit "$STATE_WARNING"
+else
+    echo "FILE_AGE OK: $file is $age_days days old | $perfdata"
+    exit "$STATE_OK"
+fi
