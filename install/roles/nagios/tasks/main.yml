@@ -370,6 +370,29 @@
     - services.cfg
   become: true
 
+- name: Install SELinux Python bindings (EL8+)
+  ansible.builtin.package:
+    name: python3-libselinux
+    state: present
+  become: true
+  when:
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int >= 8
+    - ansible_system == "Linux"
+
+- name: Install SELinux Python bindings (EL7)
+  ansible.builtin.package:
+    name:
+      - libselinux-python
+      - libselinux-python3
+    state: present
+  ignore_errors: true
+  become: true
+  when:
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int <= 7
+    - ansible_system == "Linux"
+
 - name: Apply SELinux boolean nagios_run_sudo
   ansible.posix.seboolean:
     name: nagios_run_sudo

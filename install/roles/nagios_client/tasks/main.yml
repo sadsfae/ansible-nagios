@@ -115,7 +115,6 @@
       - nagios-plugins-users
       - nagios-plugins-disk
       - nagios-plugins-tcp
-      - nagios-plugins-file_age
     state: present
   become: true
   when:
@@ -133,7 +132,6 @@
       - nagios-plugins-users
       - nagios-plugins-disk
       - nagios-plugins-tcp
-      - nagios-plugins-file_age
     state: present
   become: true
   when:
@@ -233,17 +231,47 @@
   become: true
   when: ansible_system == "FreeBSD"
 
+- name: Copy check_file_age_days plugin
+  ansible.builtin.copy:
+    src: check_file_age_days
+    dest: "{{ nrpe_plugin_dir }}/check_file_age_days"
+    mode: '0755'
+  become: true
+
 - name: Manage NRPE NOPASSWD sudo for check_file_age (filemon_hosts)
   community.general.sudoers:
     name: nagios_check_file_age
     state: "{{ 'present' if inventory_hostname in groups.get('filemon_hosts', []) else 'absent' }}"
     user: "{{ nrpe_user }}"
     runas: root
-    commands: "{{ nrpe_plugin_dir }}/check_file_age"
+    commands: "{{ nrpe_plugin_dir }}/check_file_age_days"
     nopassword: true
     sudoers_path: "{{ nrpe_sudoers_dir }}"
     validation: required
   become: true
+
+- name: Install SELinux Python bindings (EL8+)
+  ansible.builtin.package:
+    name: python3-libselinux
+    state: present
+  become: true
+  when:
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int >= 8
+    - ansible_system == "Linux"
+
+- name: Install SELinux Python bindings (EL7)
+  ansible.builtin.package:
+    name:
+      - libselinux-python
+      - libselinux-python3
+    state: present
+  ignore_errors: true
+  become: true
+  when:
+    - ansible_os_family in ["RedHat", "Rocky"]
+    - ansible_distribution_major_version | int <= 7
+    - ansible_system == "Linux"
 
 - name: Apply SELinux boolean nagios_run_sudo
   ansible.posix.seboolean:
