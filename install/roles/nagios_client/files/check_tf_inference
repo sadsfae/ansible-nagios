@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""
+check_tf_inference - NRPE plugin to monitor a local TensorFlow Serving instance.
+
+BEST EFFORT AND UNTESTED: written from TensorFlow Serving's documented
+Prometheus metrics (GET /monitoring/prometheus/metrics on the model server
+HTTP port, default 8501) and not yet verified against a live deployment.
+Confirm metric names and thresholds against your server before relying on it.
+
+Counters and latency totals are cumulative since server start, so the average
+latency and error ratio dampen over time; treat sustained WARNINGs seriously.
+Kernel memory pressure (PSI) is read the same way as check_vllm_inference.
+
+Exit codes: 0 OK, 1 WARNING, 2 CRITICAL, 3 UNKNOWN.
+
+Usage:
+  check_tf_inference [-H host] [-p port] [-l latency_warn] [-L latency_crit]
+                     [-e err_ratio_warn] [-E err_ratio_crit] [-s psi_some_warn]
+                     [-S psi_some_crit] [-f psi_full_crit]
+"""
+
+import argparse
+import os
+import re
+import sys
+import urllib.request
+
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8501
+DEFAULT_METRICS_PATH = "/monitoring/prometheus/metrics"
+DEFAULT_LATENCY_WARN = 5.0    # average request latency (seconds) WARN
+DEFAULT_LATENCY_CRIT = 10.0   # average request latency (seconds) CRIT
+DEFAULT_ERR_WARN = 0.05       # cumulative error ratio (0-1) WARN
+DEFAULT_ERR_CRIT = 0.20       # cumulative error ratio (0-1) CRIT
+DEFAULT_PSI_SOME_WARN = 10.0  # memory PSI 'some' avg10 % WARN
+DEFAULT_PSI_SOME_CRIT = 25.0  # memory PSI 'some' avg10 % CRIT
+DEFAULT_PSI_FULL_CRIT = 5.0   # memory PSI 'full' avg10 % CRIT
+
+
+def fetch_metrics(host, port, path=DEFAULT_METRICS_PATH, timeout=5):
+    url = "http://{}:{}{}".format(host, port, path)
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", "replace")
+
+
+def parse_metrics(text):
+    """Return {metric_name: float}, summing series that share a name
+    (TF Serving emits one series per loaded model)."""
+    out = {}
+    for line in text.splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        # TF Serving metric lines carry labels, e.g.  :tensorflow:serving:ok_request_count{model_path="..."} 12
+        m = re.match(r"^([A-Za-z0-9_:.\-]+)(?:\{[^}]*\})?\s+([0-9.eE+\-]+)", line)
+        if m:
+            out[m.group(1)] = out.get(m.group(1), 0.0) + float(m.group(2))
+    return out
+
+
+def read_psi():
+    """Return {some_avg10:float, full_avg10:float} from /proc/pressure/memory, or None."""
+    path = "/proc/pressure/memory"
+    if not os.path.exists(path):
+        return None
+    out = {}
+    try:
+        with open(path) as fh:
+            for line in fh:
+                parts = line.split()
+                key = parts[0]
+                for tok in parts[1:]:
+                    k, v = tok.split("=")
+                    if k == "avg10":
+                        out[key + "_avg10"] = float(v)
+    except OSError:
+        return None
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("-H", "--host", default=DEFAULT_HOST)
+    ap.add_argument("-p", "--port", type=int, default=DEFAULT_PORT)
+    ap.add_argument("-l", "--latency-warn", type=float, default=DEFAULT_LATENCY_WARN)
+    ap.add_argument("-L", "--latency-crit", type=float, default=DEFAULT_LATENCY_CRIT)
+    ap.add_argument("-e", "--err-warn", type=float, default=DEFAULT_ERR_WARN)
+    ap.add_argument("-E", "--err-crit", type=float, default=DEFAULT_ERR_CRIT)
+    ap.add_argument("-s", "--psi-some-warn", type=float, default=DEFAULT_PSI_SOME_WARN)
+    ap.add_argument("-S", "--psi-some-crit", type=float, default=DEFAULT_PSI_SOME_CRIT)
+    ap.add_argument("-f", "--psi-full-crit", type=float, default=DEFAULT_PSI_FULL_CRIT)
+    args = ap.parse_args()
+
+    try:
+        text = fetch_metrics(args.host, args.port)
+    except Exception as exc:
+        print("CRITICAL - TensorFlow Serving metrics unreachable at {}:{}: {}".format(args.host, args.port, exc))
+        return 2
+
+    m = parse_metrics(text)
+
+    ok = m.get(":tensorflow:serving:ok_request_count", 0.0)
+    err = m.get(":tensorflow:serving:error_request_count", 0.0)
+    lat_sum = m.get(":tensorflow:serving:request_latency_sum", 0.0)
+    lat_cnt = m.get(":tensorflow:serving:request_latency_count", 0.0)
+    avg_latency = lat_sum / lat_cnt if lat_cnt > 0 else 0.0
+    total = ok + err
+    err_ratio = err / total if total > 0 else 0.0
+
+    psi = read_psi()
+    some = psi.get("some_avg10", 0.0) if psi else 0.0
+    full = psi.get("full_avg10", 0.0) if psi else 0.0
+
+    # Health decision
+    reasons = []
+    status = 0
+
+    if avg_latency >= args.latency_crit:
+        status = max(status, 2)
+        reasons.append("avg_latency {:.2f}s>={:.2f}s".format(avg_latency, args.latency_crit))
+    elif avg_latency >= args.latency_warn:
+        status = max(status, 1)
+        reasons.append("avg_latency {:.2f}s>={:.2f}s".format(avg_latency, args.latency_warn))
+
+    if err_ratio >= args.err_crit:
+        status = max(status, 2)
+        reasons.append("err_ratio {:.1%}>={:.1%}".format(err_ratio, args.err_crit))
+    elif err_ratio >= args.err_warn:
+        status = max(status, 1)
+        reasons.append("err_ratio {:.1%}>={:.1%}".format(err_ratio, args.err_warn))
+
+    if psi and full >= args.psi_full_crit:
+        status = max(status, 2)
+        reasons.append("psi_full {:.1f}%>={:.1f}%".format(full, args.psi_full_crit))
+    elif psi and some >= args.psi_some_crit:
+        status = max(status, 2)
+        reasons.append("psi_some {:.1f}%>={:.1f}%".format(some, args.psi_some_crit))
+    elif psi and some >= args.psi_some_warn:
+        status = max(status, 1)
+        reasons.append("psi_some {:.1f}%>={:.1f}%".format(some, args.psi_some_warn))
+
+    label = {0: "OK", 1: "WARNING", 2: "CRITICAL"}[status]
+    detail = ", ".join(reasons) if reasons else "healthy"
+
+    perf = "| ok={:.0f} errors={:.0f} avg_latency={:.3f};{:.1f};{:.1f} err_ratio={:.4f};{:.2f};{:.2f} psi_some={};{} psi_full={};{}".format(
+        ok, err, avg_latency, args.latency_warn, args.latency_crit,
+        err_ratio, args.err_warn, args.err_crit,
+        some, args.psi_some_warn, full, args.psi_full_crit
+    )
+
+    print("{} - TensorFlow Serving {} ({:.0f} ok/{:.0f} err, avg latency {:.2f}s, err {:.1%}, psi s/f {:.1f}/{:.1f}%) {}".format(
+        label, detail, ok, err, avg_latency, err_ratio, some, full, perf))
+    return status
+
+
+if __name__ == "__main__":
+    sys.exit(main())

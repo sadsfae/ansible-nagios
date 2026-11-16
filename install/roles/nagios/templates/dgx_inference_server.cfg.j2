@@ -1,0 +1,15 @@
+# DGX (GB10) inference servers serving local LLMs (vLLM / TensorFlow Serving)
+# inherits all standard server checks via render_group plus:
+#  - Inference check (check_inference, engine selected per host via the
+#    inference_engine inventory var: vllm default, tensorflow)
+#  - Board temp (hottest ACPI thermal zone)
+#  - liteLLM proxy (optional, dgx_litellm_enabled in group_vars)
+{% from 'monitored_hosts.j2' import render_group with context %}
+{% set inference_services = [
+    {'description': 'Inference', 'check_command': 'check_nrpe!check_inference'},
+    {'description': 'Board Temp', 'check_command': 'check_nrpe!check_dgx_board_temp'},
+] %}
+{% if dgx_litellm_enabled == true %}
+{% set inference_services = inference_services + [{'description': 'liteLLM Proxy', 'check_command': 'check_dgx_litellm'}] %}
+{% endif %}
+{{ render_group('dgx_inference_server', 'DGX Inference Servers', inference_services) }}

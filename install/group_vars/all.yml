@@ -179,3 +179,10 @@ idrac_sensor: true
 # system cpu
 idrac_cpu: true
 
+### DGX Inference Server options ###
+# extra checks for [dgx_inference_server] hosts; engine thresholds and the
+# DGX swap override live in install/group_vars/dgx_inference_server.yml
+# liteLLM proxy check (check_http from the Nagios server), disabled by default
+dgx_litellm_enabled: false
+dgx_litellm_port: 4000
+
