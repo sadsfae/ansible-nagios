@@ -105,6 +105,11 @@ ansible-galaxy collection install -r requirements.yml
   - [QUADS](https://quads.dev/about-quads) Servers *(same as server plus
     alerting on active assignments that are not validated after a time
     threshold)*
+  - DGX (GB10) inference servers *(same as servers plus vLLM engine health
+    via Prometheus metrics and kernel memory pressure, ACPI board temperature,
+    and an optional liteLLM proxy check; TensorFlow Serving is best effort,
+    untested, and its metrics live on the REST port 8501, so tensorflow hosts
+    must set `inference_port=8501`)*
 - `contacts.cfg` notification settings are in `install/group_vars/all.yml` and
   templated for easy modification.
 

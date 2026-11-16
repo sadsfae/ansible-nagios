@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""
+check_vllm_inference - NRPE plugin to monitor a local vLLM inference server.
+
+Reads vLLM's Prometheus /metrics (no API key required) plus the kernel memory
+pressure (PSI) to report engine health and load. Intended for a DGX/GB10 node
+running vLLM (see the dgx_inference_server role for the TensorFlow variant).
+
+Exit codes: 0 OK, 1 WARNING, 2 CRITICAL, 3 UNKNOWN.
+
+Usage:
+  check_vllm_inference [-H host] [-p port] [-q queue_warn] [-Q queue_crit]
+                       [-k kv_warn] [-K kv_crit] [-s psi_some_warn]
+                       [-S psi_some_crit] [-f psi_full_crit]
+"""
+
+import argparse
+import os
+import re
+import sys
+import urllib.request
+
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8000
+DEFAULT_QUEUE_WARN = 5      # num_requests_waiting before WARN
+DEFAULT_QUEUE_CRIT = 20     # num_requests_waiting before CRIT
+DEFAULT_KV_WARN = 0.85      # kv_cache_usage_perc (0-1) WARN
+DEFAULT_KV_CRIT = 0.95      # kv_cache_usage_perc (0-1) CRIT (preemption imminent)
+DEFAULT_PSI_SOME_WARN = 10.0   # memory PSI 'some' avg10 % (task stalling) WARN
+DEFAULT_PSI_SOME_CRIT = 25.0   # memory PSI 'some' avg10 % CRIT
+DEFAULT_PSI_FULL_CRIT = 5.0    # memory PSI 'full' avg10 % (all tasks stalled = thrash) CRIT
+
+
+def fetch_metrics(host, port, path="/metrics", timeout=5):
+    url = "http://{}:{}{}".format(host, port, path)
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", "replace")
+
+
+def parse_metrics(text):
+    """Return {metric_name: float} for the vllm: metrics we care about."""
+    out = {}
+    for line in text.splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        # vLLM metric lines carry labels, e.g.  vllm:num_requests_running{engine="0",...} 0.0
+        m = re.match(r"^([A-Za-z0-9_:.\-]+)(?:\{[^}]*\})?\s+([0-9.eE+\-]+)", line)
+        if m:
+            out[m.group(1)] = float(m.group(2))
+    return out
+
+
+def read_psi():
+    """Return {some_avg10:float, full_avg10:float} from /proc/pressure/memory, or None."""
+    path = "/proc/pressure/memory"
+    if not os.path.exists(path):
+        return None
+    out = {}
+    try:
+        with open(path) as fh:
+            for line in fh:
+                parts = line.split()
+                key = parts[0]
+                for tok in parts[1:]:
+                    k, v = tok.split("=")
+                    if k == "avg10":
+                        out[key + "_avg10"] = float(v)
+    except OSError:
+        return None
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("-H", "--host", default=DEFAULT_HOST)
+    ap.add_argument("-p", "--port", type=int, default=DEFAULT_PORT)
+    ap.add_argument("-q", "--queue-warn", type=int, default=DEFAULT_QUEUE_WARN)
+    ap.add_argument("-Q", "--queue-crit", type=int, default=DEFAULT_QUEUE_CRIT)
+    ap.add_argument("-k", "--kv-warn", type=float, default=DEFAULT_KV_WARN)
+    ap.add_argument("-K", "--kv-crit", type=float, default=DEFAULT_KV_CRIT)
+    ap.add_argument("-s", "--psi-some-warn", type=float, default=DEFAULT_PSI_SOME_WARN)
+    ap.add_argument("-S", "--psi-some-crit", type=float, default=DEFAULT_PSI_SOME_CRIT)
+    ap.add_argument("-f", "--psi-full-crit", type=float, default=DEFAULT_PSI_FULL_CRIT)
+    args = ap.parse_args()
+
+    try:
+        text = fetch_metrics(args.host, args.port)
+    except Exception as exc:
+        print("CRITICAL - vLLM metrics unreachable at {}:{}: {}".format(args.host, args.port, exc))
+        return 2
+
+    m = parse_metrics(text)
+
+    running = m.get("vllm:num_requests_running", 0.0)
+    waiting = m.get("vllm:num_requests_waiting", 0.0)
+    swapped = m.get("vllm:num_requests_swapped", 0.0)
+    kv = m.get("vllm:kv_cache_usage_perc", 0.0)
+    # old vLLM versions name it gpu_cache_usage_perc
+    if "vllm:kv_cache_usage_perc" not in m:
+        kv = m.get("vllm:gpu_cache_usage_perc", 0.0)
+    sched = m.get("vllm:num_requests_scheduled", 0.0)
+    spec_accept = m.get("vllm:spec_decode_draft_acceptance_rate")
+
+    psi = read_psi()
+    some = psi.get("some_avg10", 0.0) if psi else 0.0
+    full = psi.get("full_avg10", 0.0) if psi else 0.0
+
+    # Health decision
+    reasons = []
+    status = 0
+
+    if waiting >= args.queue_crit:
+        status = max(status, 2)
+        reasons.append("queue {}>={}".format(int(waiting), args.queue_crit))
+    elif waiting >= args.queue_warn:
+        status = max(status, 1)
+        reasons.append("queue {}>={}".format(int(waiting), args.queue_warn))
+
+    if kv >= args.kv_crit:
+        status = max(status, 2)
+        reasons.append("kv_cache {:.0%}>={:.0%}".format(kv, args.kv_crit))
+    elif kv >= args.kv_warn:
+        status = max(status, 1)
+        reasons.append("kv_cache {:.0%}>={:.0%}".format(kv, args.kv_warn))
+
+    if psi and full >= args.psi_full_crit:
+        status = max(status, 2)
+        reasons.append("psi_full {:.1f}%>={:.1f}%".format(full, args.psi_full_crit))
+    elif psi and some >= args.psi_some_crit:
+        status = max(status, 2)
+        reasons.append("psi_some {:.1f}%>={:.1f}%".format(some, args.psi_some_crit))
+    elif psi and some >= args.psi_some_warn:
+        status = max(status, 1)
+        reasons.append("psi_some {:.1f}%>={:.1f}%".format(some, args.psi_some_warn))
+
+    label = {0: "OK", 1: "WARNING", 2: "CRITICAL"}[status]
+    detail = ", ".join(reasons) if reasons else "healthy"
+    spec = " spec_accept={:.2f}".format(spec_accept) if spec_accept is not None else ""
+
+    perf = "| running={};{};{} waiting={};{};{} kv_cache={};{:.2f};{:.2f} psi_some={};{} psi_full={};{}".format(
+        int(running), args.queue_warn, args.queue_crit,
+        int(waiting), args.queue_warn, args.queue_crit,
+        kv, args.kv_warn, args.kv_crit,
+        some, args.psi_some_warn, full, args.psi_full_crit
+    )
+
+    print("{} - vLLM inference {} ({} run/{} wait/{} swap, kv {:.0%}, psi s/f {:.1f}/{:.1f}%){} {}".format(
+        label, detail, int(running), int(waiting), int(swapped), kv, some, full, spec, perf))
+    return status
+
+
+if __name__ == "__main__":
+    sys.exit(main())

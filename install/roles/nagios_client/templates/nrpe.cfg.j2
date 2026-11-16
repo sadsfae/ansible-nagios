@@ -198,7 +198,7 @@ command[{{ nrpe_cmd.load }}]={{ nrpe_plugin_dir }}/check_load -w {{ warning_load
 command[{{ nrpe_cmd.disk }}]={{ nrpe_plugin_dir }}/check_disk -w 20% -c 10% -p {{ root_disk }}
 command[{{ nrpe_cmd.procs }}]={{ nrpe_plugin_dir }}/check_procs -w {{ warning_proc }} -c {{ critical_proc }}
 command[{{ nrpe_cmd.zombie }}]={{ nrpe_plugin_dir }}/check_procs -w 5 -c 10 -s Z
-command[{{ nrpe_cmd.swap }}]={{ nrpe_plugin_dir }}/check_swap -w 60 -c 10
+command[{{ nrpe_cmd.swap }}]={{ nrpe_plugin_dir }}/check_swap -w {{ dgx_swap_warn if inventory_hostname in groups.get('dgx_inference_server', []) else 60 }} -c {{ dgx_swap_crit if inventory_hostname in groups.get('dgx_inference_server', []) else 10 }}
 command[{{ nrpe_cmd.uptime }}]={{ nrpe_plugin_dir }}/{{ nrpe_cmd.uptime }}
 command[check_tcp_es]={{ nrpe_plugin_dir }}/check_tcp -H localhost -p {{ elasticsearch_port }}
 command[check_jenkins]={{ nrpe_plugin_dir }}/check_tcp -H localhost -p {{ jenkins_port }}
@@ -213,6 +213,16 @@ command[{{ nrpe_cmd.file_age }}_{{ loop.index0 }}]={{ sudo_bin }} {{ nrpe_plugin
 {% else %}
 command[{{ nrpe_cmd.file_age }}]={{ sudo_bin }} {{ nrpe_plugin_dir }}/check_file_age_days -f {{ filemon_target_file }} -w {{ filemon_warn_days | int }} -c {{ filemon_crit_days | int }}
 {% endif %}
+{% endif %}
+{% if inventory_hostname in groups.get('dgx_inference_server', []) %}
+# DGX inference checks: engine /metrics plus kernel memory PSI; one command,
+# engine selected via the inference_engine inventory var (vllm default, tensorflow)
+{% if inference_engine | default('vllm') == 'tensorflow' %}
+command[check_inference]={{ nrpe_plugin_dir }}/check_tf_inference -p {{ inference_port }} -l {{ inference_latency_warn }} -L {{ inference_latency_crit }} -e {{ inference_err_warn }} -E {{ inference_err_crit }} -s {{ inference_psi_some_warn }} -S {{ inference_psi_some_crit }} -f {{ inference_psi_full_crit }}
+{% else %}
+command[check_inference]={{ nrpe_plugin_dir }}/check_vllm_inference -p {{ inference_port }} -q {{ inference_queue_warn }} -Q {{ inference_queue_crit }} -k {{ inference_kv_warn }} -K {{ inference_kv_crit }} -s {{ inference_psi_some_warn }} -S {{ inference_psi_some_crit }} -f {{ inference_psi_full_crit }}
+{% endif %}
+command[check_dgx_board_temp]={{ nrpe_plugin_dir }}/check_dgx_board_temp -w {{ dgx_board_temp_warn }} -c {{ dgx_board_temp_crit }}
 {% endif %}
 
 # The following examples allow user-supplied arguments and can
