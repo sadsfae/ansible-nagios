@@ -318,6 +318,7 @@
     - quads_servers.cfg
     - quads_servers_with_ssl.cfg
     - filemon_hosts.cfg
+    - dgx_inference_server.cfg
   register: nagios_config
   become: true
 

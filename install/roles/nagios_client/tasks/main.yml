@@ -238,6 +238,20 @@
     mode: '0755'
   become: true
 
+- name: Copy DGX inference check plugins
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ nrpe_plugin_dir }}/{{ item }}"
+    mode: '0755'
+  become: true
+  loop:
+    - check_vllm_inference
+    - check_tf_inference
+    - check_dgx_board_temp
+  when:
+    - inventory_hostname in groups.get('dgx_inference_server', [])
+    - ansible_system == "Linux"
+
 - name: Manage NRPE NOPASSWD sudo for check_file_age (filemon_hosts)
   community.general.sudoers:
     name: nagios_check_file_age

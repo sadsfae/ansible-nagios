@@ -84,3 +84,10 @@ host-01
 
 # Inherits QUADS server checks, includes ssl and http check.
 [quads_servers_with_ssl]
+
+# DGX (GB10) inference servers serving local LLMs: inherits all server
+# checks plus engine health (vLLM default), board temp, and optional
+# liteLLM proxy. Override the engine per host, e.g.
+# spark-02 inference_engine=tensorflow inference_port=8501
+# see install/group_vars/dgx_inference_server.yml for thresholds
+[dgx_inference_server]

@@ -1,0 +1,41 @@
+---
+### DGX Inference Server options ###
+# NVIDIA DGX / GB10-class hosts serving local LLMs (vLLM by default,
+# or TensorFlow Serving via a per-host inventory override):
+#
+#   [dgx_inference_server]
+#   spark-01
+#   spark-02 inference_engine=tensorflow
+#
+# DGX OS is Ubuntu-based; the unified CPU+GPU memory is mostly filled by the
+# model, so swap sits near-full by design. Override the generic swap check
+# thresholds here (all.yml defaults: warn 60, crit 10) instead of disabling it.
+dgx_swap_warn: 1
+dgx_swap_crit: 1
+# inference engine: vllm (default) or tensorflow (best effort, untested)
+inference_engine: vllm
+# engine metrics port (vLLM OpenAI server / TensorFlow Serving HTTP).
+# vLLM serves /metrics on its API port (8000 default); TensorFlow Serving
+# serves /monitoring/prometheus/metrics on its REST port (8501 default), so
+# tensorflow hosts must set inference_port=8501 (or run TF with --rest_api_port=8000)
+inference_port: 8000
+
+# vLLM check thresholds (check_vllm_inference)
+inference_queue_warn: 5
+inference_queue_crit: 20
+inference_kv_warn: 0.85
+inference_kv_crit: 0.95
+inference_psi_some_warn: 10.0
+inference_psi_some_crit: 25.0
+inference_psi_full_crit: 5.0
+
+# TensorFlow Serving check thresholds (check_tf_inference, untested)
+inference_latency_warn: 5.0
+inference_latency_crit: 10.0
+inference_err_warn: 0.05
+inference_err_crit: 0.20
+
+# board temperature: hottest ACPI thermal zone, WARN/CRIT degrees C
+# GB10 ACPI trip point is 104.8 C, so 90/95 leaves emergency headroom.
+dgx_board_temp_warn: 90
+dgx_board_temp_crit: 95

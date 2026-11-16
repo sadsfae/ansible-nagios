@@ -155,6 +155,13 @@ define command{
         command_line    {{ plugin_dir }}/idrac_2.2rc4 -H $HOSTADDRESS$ {{snmp_opts}} -m {{snmp_mib_path}}/idrac-smiv2.mib {{snmp_check_thresholds}} -w CPU
 }
 
+# 'check_dgx_litellm' command definition for DGX inference servers
+# liteLLM proxy HTTP check, enabled via dgx_litellm_enabled in all.yml
+define command{
+        command_name    check_dgx_litellm
+        command_line    $USER1$/check_http -I $HOSTADDRESS$ -p {{dgx_litellm_port}}
+}
+
 ### FreeNAS Checks
 define command{
 	command_name	check_freenas_disk

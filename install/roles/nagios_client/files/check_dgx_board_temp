@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""check_dgx_board_temp - hottest ACPI/board thermal zone on ARM/ACPI boards (DGX/GB10).
+
+Usage: check_dgx_board_temp [-w 90] [-c 95]   # degrees Celsius
+Exit: 0 OK, 1 WARNING, 2 CRITICAL, 3 UNKNOWN."""
+import argparse, glob, os, sys
+
+def _millideg(path):
+    try:
+        with open(path) as f:
+            return int(f.read().strip())
+    except Exception:
+        return None
+
+def _zones():
+    # Prefer hwmon entries named acpitz; fall back to thermal_zone*/temp (millidegC).
+    z = {}
+    for d in sorted(glob.glob("/sys/class/hwmon/hwmon*")):
+        np = os.path.join(d, "name")
+        if not os.path.exists(np) or open(np).read().strip() != "acpitz":
+            continue
+        for t in glob.glob(os.path.join(d, "temp*_input")):
+            v = _millideg(t)
+            if v is not None:
+                z[t] = v
+    if not z:
+        for t in sorted(glob.glob("/sys/class/thermal/thermal_zone*/temp")):
+            v = _millideg(t)
+            if v is not None:
+                z[t] = v
+    return z
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("-w", "--warn", type=float, default=90.0, help="threshold in degrees C")
+    ap.add_argument("-c", "--crit", type=float, default=95.0, help="threshold in degrees C")
+    a = ap.parse_args()
+    z = _zones()
+    if not z:
+        print("UNKNOWN - no ACPI/board thermal zones found")
+        return 3
+    hottest = max(z.values())          # millidegC
+    w = int(a.warn * 1000)
+    c = int(a.crit * 1000)
+    status = 0
+    if hottest >= c:
+        status = 2
+    elif hottest >= w:
+        status = 1
+    label = {0: "OK", 1: "WARNING", 2: "CRITICAL"}[status]
+    print("{} - board temp {:.1f} C (warn {:.0f} C / crit {:.0f} C, {} zones) | hottest={:.0f};{:.0f};{:.0f}".format(
+        label, hottest / 1000, a.warn, a.crit, len(z),
+        hottest / 1000, a.warn, a.crit))
+    return status
+
+if __name__ == "__main__":
+    sys.exit(main())
