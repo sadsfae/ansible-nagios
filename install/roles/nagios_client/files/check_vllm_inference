@@ -22,8 +22,8 @@ import urllib.request
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
-DEFAULT_QUEUE_WARN = 5      # num_requests_waiting before WARN
-DEFAULT_QUEUE_CRIT = 20     # num_requests_waiting before CRIT
+DEFAULT_QUEUE_WARN = 10      # num_requests_waiting before WARN
+DEFAULT_QUEUE_CRIT = 15      # num_requests_waiting before CRIT
 DEFAULT_KV_WARN = 0.85      # kv_cache_usage_perc (0-1) WARN
 DEFAULT_KV_CRIT = 0.95      # kv_cache_usage_perc (0-1) CRIT (preemption imminent)
 DEFAULT_PSI_SOME_WARN = 10.0   # memory PSI 'some' avg10 % (task stalling) WARN
