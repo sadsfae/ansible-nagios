@@ -21,8 +21,8 @@ inference_engine: vllm
 inference_port: 8000
 
 # vLLM check thresholds (check_vllm_inference)
-inference_queue_warn: 5
-inference_queue_crit: 20
+inference_queue_warn: 10
+inference_queue_crit: 15
 inference_kv_warn: 0.85
 inference_kv_crit: 0.95
 inference_psi_some_warn: 10.0
